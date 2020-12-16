@@ -80,7 +80,6 @@ from monai.transforms import (
     RandZoomd,
     Rand2DElasticd,
     RandAffined,
-    AsDiscrete,
 )
 
 aug_prob = 0.5
@@ -162,7 +161,7 @@ net = net.to(device)
 opt = torch.optim.Adam(net.parameters(), lr)
 loss = DiceLoss(sigmoid=True)
 metric = DiceMetric(
-    include_background=True, reduction="mean"
+    include_background=True, to_onehot_y=False, sigmoid=True, reduction="mean"
 )
 
 step_losses = []
@@ -196,10 +195,9 @@ for epoch in range(num_epochs):
             bimages = bimages.to(device)
             bsegs = bsegs.to(device)
 
-            m = monai.transforms.AsDiscrete()
             prediction = net(bimages)
-            pred_metric = metric(m(prediction), bsegs)
-            metric_vals.append(pred_metric)
+            pred_metric = metric(prediction, bsegs)
+            metric_vals.append(pred_metric.item())
 
     epoch_metrics.append((total_step, np.average(metric_vals)))
 
@@ -217,4 +215,3 @@ ax[0].set_title("Step Loss")
 ax[1].plot(*zip(*epoch_metrics))
 ax[1].set_title("Per-Step Validation Results")
 plt.show()
-
