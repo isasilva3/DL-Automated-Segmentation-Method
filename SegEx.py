@@ -161,7 +161,7 @@ net = net.to(device)
 opt = torch.optim.Adam(net.parameters(), lr)
 loss = DiceLoss(sigmoid=True)
 metric = DiceMetric(
-    include_background=True, sigmoid=True, reduction="mean"
+    include_background=True, reduction="mean"
 )
 
 step_losses = []
