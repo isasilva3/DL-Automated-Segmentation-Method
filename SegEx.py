@@ -195,8 +195,9 @@ for epoch in range(num_epochs):
             bimages = bimages.to(device)
             bsegs = bsegs.to(device)
 
+            m = monai.transforms.AsDiscrete()
             prediction = net(bimages)
-            pred_metric = metric(torch.nn.Sigmoid(prediction), bsegs)
+            pred_metric = metric(m(prediction), bsegs)
             metric_vals.append(pred_metric.item())
 
     epoch_metrics.append((total_step, np.average(metric_vals)))
