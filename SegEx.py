@@ -161,7 +161,7 @@ net = net.to(device)
 opt = torch.optim.Adam(net.parameters(), lr)
 loss = DiceLoss(sigmoid=True)
 metric = DiceMetric(
-    include_background=True, reduction="mean"
+    include_background=True, sigmoid=True, reduction="mean"
 )
 
 step_losses = []
@@ -195,9 +195,8 @@ for epoch in range(num_epochs):
             bimages = bimages.to(device)
             bsegs = bsegs.to(device)
 
-            m = torch.nn.Sigmoid()
             prediction = net(bimages)
-            pred_metric = metric(m(prediction), bsegs)
+            pred_metric = metric(prediction, bsegs)
             metric_vals.append(pred_metric.item())
 
     epoch_metrics.append((total_step, np.average(metric_vals)))
