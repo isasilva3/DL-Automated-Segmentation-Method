@@ -80,6 +80,7 @@ from monai.transforms import (
     RandZoomd,
     Rand2DElasticd,
     RandAffined,
+    AsDiscrete,
 )
 
 aug_prob = 0.5
