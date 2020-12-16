@@ -196,7 +196,7 @@ for epoch in range(num_epochs):
             bsegs = bsegs.to(device)
 
             prediction = net(bimages)
-            pred_metric = metric(torch.Sigmoid(prediction), bsegs)
+            pred_metric = metric(torch.nn.sigmoid(prediction), bsegs)
             metric_vals.append(pred_metric.item())
 
     epoch_metrics.append((total_step, np.average(metric_vals)))
