@@ -1,6 +1,7 @@
 #%%
 
 #Importation of MONAI and other dependencies
+import io
 
 import matplotlib
 from urllib.request import urlopen
@@ -214,4 +215,5 @@ ax[0].set_title("Step Loss")
 
 ax[1].plot(*zip(*epoch_metrics))
 ax[1].set_title("Per-Step Validation Results")
-plt.show()
+buf = io.BytesIO()
+plt.savefig(buf, format='png')
