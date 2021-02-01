@@ -81,9 +81,9 @@ This allows you to save results and reuse downloads.
 If not specified a temporary directory will be used.
 """
 
-directory = os.environ.get("MONAI_DATA_DIRECTORY")
-root_dir = tempfile.mkdtemp() if directory is None else directory
-print(root_dir)
+#directory = os.environ.get("MONAI_DATA_DIRECTORY")
+#root_dir = tempfile.mkdtemp() if directory is None else directory
+#print(root_dir)
 
 """## Download dataset
 
@@ -96,13 +96,16 @@ The dataset comes from http://medicaldecathlon.com/.
 md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
 #filepath = r'C:\Users\isasi\OneDrive\Desktop\Lungs.zip'
-filepath = '/home/imoreira/Data/Lungs.zip'
-compressed_file = os.path.join(root_dir, "Lungs.zip")
+#filepath = '/home/imoreira/Data/Lungs.zip'
+#compressed_file = os.path.join(root_dir, "Lungs.zip")
+#data_dir = os.path.join(root_dir, "Lungs")
+#if not os.path.exists(data_dir):
+#    extractall(filepath, root_dir, hash_type='md5')
+
+root_dir = "/home/imoreira/Data"
+#root_dir = "C:\\Users\\isasi\\OneDrive\\Desktop"
 data_dir = os.path.join(root_dir, "Lungs")
-if not os.path.exists(data_dir):
-    extractall(filepath, root_dir, hash_type='md5')
-
-
+out_dir = os.path.join(root_dir, "Output")
 
 """## Set MSD Spleen dataset path"""
 
@@ -112,7 +115,8 @@ data_dicts = [
     {"image": image_name, "label": label_name}
     for image_name, label_name in zip(train_images, train_labels)
 ]
-train_files, val_files = data_dicts[:-9], data_dicts[-9:] #HERE
+train_files, val_files = data_dicts[:-3], data_dicts[-3:] #HERE
+#k = int(0.2*length_data)
 
 """## Set deterministic training for reproducibility"""
 
@@ -178,7 +182,7 @@ val_transforms = Compose(
 check_ds = Dataset(data=val_files, transform=val_transforms)
 check_loader = DataLoader(check_ds, batch_size=1)
 check_data = first(check_loader)
-image, label = (check_data["image"][0][0], check_data["label"][0][0]) #HERE
+image, label = (check_data["image"][0][0], check_data["label"][0][0])
 print(f"image shape: {image.shape}, label shape: {label.shape}")
 # plot the slice [:, :, 80]
 plt.figure("check", (12, 6))
@@ -287,7 +291,7 @@ for epoch in range(epoch_num):
             if metric > best_metric:
                 best_metric = metric
                 best_metric_epoch = epoch + 1
-                torch.save(model.state_dict(), os.path.join(root_dir, "best_metric_model.pth"))
+                torch.save(model.state_dict(), os.path.join(out_dir, "best_metric_model.pth"))
                 print("saved new best metric model")
             print(
                 f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
@@ -315,7 +319,7 @@ plt.show()
 
 """## Check best model output with the input image and label"""
 
-model.load_state_dict(torch.load(os.path.join(root_dir, "best_metric_model.pth")))
+model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
 with torch.no_grad():
     for i, val_data in enumerate(val_loader):
@@ -342,5 +346,5 @@ with torch.no_grad():
 Remove directory if a temporary was used.
 """
 
-if directory is None:
-    shutil.rmtree(root_dir)
+#if directory is None:
+#    shutil.rmtree(out_dir)
