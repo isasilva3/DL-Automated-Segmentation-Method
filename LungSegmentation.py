@@ -102,8 +102,8 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 #if not os.path.exists(data_dir):
 #    extractall(filepath, root_dir, hash_type='md5')
 
-root_dir = "//home//imoreira//Data"
-#root_dir = "C:\\Users\\isasi\\OneDrive\\Desktop"
+#root_dir = "//home//imoreira//Data"
+root_dir = "C:\\Users\\isasi\\OneDrive\\Desktop"
 data_dir = os.path.join(root_dir, "Lungs")
 out_dir = os.path.join(root_dir, "Output")
 
@@ -232,7 +232,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 5
+epoch_num = 400
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
