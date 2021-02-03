@@ -102,8 +102,8 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 #if not os.path.exists(data_dir):
 #    extractall(filepath, root_dir, hash_type='md5')
 
-#root_dir = "//home//imoreira//Data"
-root_dir = "C:\\Users\\isasi\\OneDrive\\Desktop"
+root_dir = "//home//imoreira//Data"
+#root_dir = "C:\\Users\\isasi\\OneDrive\\Desktop"
 data_dir = os.path.join(root_dir, "Lungs")
 out_dir = os.path.join(root_dir, "Output")
 
