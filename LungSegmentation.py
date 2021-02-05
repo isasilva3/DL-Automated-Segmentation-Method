@@ -103,7 +103,7 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 #    extractall(filepath, root_dir, hash_type='md5')
 
 root_dir = "//home//imoreira//Data"
-#root_dir = "C:\\Users\\isasi\\OneDrive\\Desktop"
+#root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Lungs")
 out_dir = os.path.join(root_dir, "Output")
 
@@ -192,7 +192,9 @@ plt.imshow(image[:, :, 80], cmap="gray")
 plt.subplot(1, 2, 2)
 plt.title("label")
 plt.imshow(label[:, :, 80])
-plt.show()
+fig = plt.show()
+fig.savefig('my_figure.png')
+
 
 """## Define CacheDataset and DataLoader for training and validation
 
@@ -232,7 +234,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 400
+epoch_num = 2
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
