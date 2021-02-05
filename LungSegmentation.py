@@ -304,7 +304,7 @@ print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_
 
 """## Plot the loss and metric"""
 
-plt.figure("train", (12, 6))
+fig2=plt.figure("train", (12, 6))
 plt.subplot(1, 2, 1)
 plt.title("Epoch Average Loss")
 x = [i + 1 for i in range(len(epoch_loss_values))]
@@ -318,6 +318,7 @@ y = metric_values
 plt.xlabel("epoch")
 plt.plot(x, y)
 plt.show()
+fig2.savefig('plot_figure.png')
 
 """## Check best model output with the input image and label"""
 
@@ -331,7 +332,7 @@ with torch.no_grad():
             val_data["image"].to(device), roi_size, sw_batch_size, model
         )
         # plot the slice [:, :, 80]
-        plt.figure("check", (18, 6))
+        fig3=plt.figure("check", (18, 6))
         plt.subplot(1, 3, 1)
         plt.title(f"image {i}")
         plt.imshow(val_data["image"][0, 0, :, :, 80], cmap="gray")
@@ -342,6 +343,7 @@ with torch.no_grad():
         plt.title(f"output {i}")
         plt.imshow(torch.argmax(val_outputs, dim=1).detach().cpu()[0, :, :, 80])
         plt.show()
+        fig3.savefig('image_label.png')
 
 """## Cleanup data directory
 
