@@ -185,7 +185,7 @@ check_data = first(check_loader)
 image, label = (check_data["image"][0][0], check_data["label"][0][0])
 print(f"image shape: {image.shape}, label shape: {label.shape}")
 # plot the slice [:, :, 80]
-fig = plt.figure("check", (12, 6))
+fig = plt.figure("check", (12, 6)) #figure size
 plt.subplot(1, 2, 1)
 plt.title("image")
 plt.imshow(image[:, :, 80], cmap="gray")
@@ -234,7 +234,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 2
+epoch_num = 600
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
