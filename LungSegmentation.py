@@ -339,20 +339,10 @@ with torch.no_grad():
         plt.title(f"output {i}")
         plt.imshow(torch.argmax(val_outputs, dim=1).detach().cpu()[0, :, :, 80])
         plt.show()
-        fig3.savefig('image_label.nii')
+        fig3.savefig('image_label.tif')
+
 
 '''
-patch_size = (192, 192, 16)
-sw_batch_size, overlap = 2, 0.5
-inferer = monai.inferers.SlidingWindowInferer(
-    roi_size=patch_size,
-    sw_batch_size=sw_batch_size,
-    overlap=overlap,
-    mode="gaussian",
-    padding_mode="replicate",
-)
-
-
 ckpts = sorted(glob.glob(os.path.join(model_folder, "*.pt")))
 ckpt = ckpts[-1]
 for x in ckpts:
@@ -441,7 +431,6 @@ elif args.mode == "infer":
     infer(data_folder=data_folder, model_folder=args.model_folder)
 else:
     raise ValueError("Unknown mode.")
-
 '''
 
 """## Cleanup data directory
