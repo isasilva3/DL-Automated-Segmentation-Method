@@ -334,10 +334,10 @@ with torch.no_grad():
         )
 
         out_tensor = val_outputs
-
         val_meta_dict_out = val_data["image_meta_dict"].copy()
         val_meta_dict_out["Path_File"] = pathlib.Path('//home//imoreira//Output')
-        nifti_saver = NiftiSaver()
+        #val_meta_dict_out["Path_File"] = pathlib.Path("C:\\Users\\isasi\\Downloads\\Output")
+        nifti_saver = NiftiSaver(output_dir='//home//imoreira//Output')
         nifti_saver.save(out_tensor, val_meta_dict_out)
 
         # plot the slice [:, :, 80]
