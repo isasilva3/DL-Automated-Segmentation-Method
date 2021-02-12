@@ -336,7 +336,7 @@ with torch.no_grad():
         out_tensor = val_outputs
 
         val_meta_dict_out = val_data["image_meta_dict"].copy()
-        val_meta_dict_out["//home//imoreira//Output"] = pathlib
+        val_meta_dict_out["Path_File"] = pathlib.Path('//home//imoreira//Output')
         nifti_saver = NiftiSaver()
         nifti_saver.save(out_tensor, val_meta_dict_out)
 
