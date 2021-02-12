@@ -352,6 +352,8 @@ img_dir="//home//imoreira//JupyterExercise"
 out_dir="//home//imoreira//JupyterExercise"
 
 def arg_parser():
+    img_dir = "//home//imoreira//JupyterExercise"
+    out_dir = "//home//imoreira//JupyterExercise"
     parser = argparse.ArgumentParser(description='merge 2d tif images into a 3d image')
     parser.add_argument('img_dir', type=str,
                         help='//home//imoreira//JupyterExercise')
@@ -363,6 +365,8 @@ def arg_parser():
 
 
 def split_filename(filepath):
+    img_dir = "//home//imoreira//JupyterExercise"
+    out_dir = "//home//imoreira//JupyterExercise"
     path = os.path.dirname(filepath)
     filename = os.path.basename(filepath)
     base, ext = os.path.splitext(filename)
@@ -373,6 +377,8 @@ def split_filename(filepath):
 
 
 def main():
+    img_dir = "//home//imoreira//JupyterExercise"
+    out_dir = "//home//imoreira//JupyterExercise"
     try:
         args = arg_parser().parse_args()
         img_dir = pathlib.Path(args.img_dir)
