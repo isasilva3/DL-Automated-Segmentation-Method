@@ -347,6 +347,10 @@ with torch.no_grad():
         plt.show()
         fig3.savefig('image_label.tiff')
 
+
+img_dir="//home//imoreira//JupyterExercise"
+out_dir="//home//imoreira//JupyterExercise"
+
 def arg_parser():
     parser = argparse.ArgumentParser(description='merge 2d tif images into a 3d image')
     parser.add_argument('img_dir', type=str,
