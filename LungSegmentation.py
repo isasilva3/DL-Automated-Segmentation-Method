@@ -30,6 +30,8 @@ from pathlib import Path
 import sys
 from glob import glob
 import os
+import copy
+
 
 import numpy as np
 
@@ -62,6 +64,7 @@ import torch
 from monai.apps import download_and_extract
 from monai.config import print_config
 from monai.data import CacheDataset, DataLoader, Dataset
+from monai.data.nifti_saver import NiftiSaver
 from monai.inferers import sliding_window_inference
 from monai.losses import DiceLoss
 from monai.metrics import compute_meandice
@@ -90,18 +93,12 @@ This allows you to save results and reuse downloads.
 If not specified a temporary directory will be used.
 """
 
-#directory = os.environ.get("MONAI_DATA_DIRECTORY")
-#root_dir = tempfile.mkdtemp() if directory is None else directory
-#print(root_dir)
-
 """## Download dataset
 
 Downloads and extracts the dataset.  
 The dataset comes from http://medicaldecathlon.com/.
 """
 
-#var = (r'C:\Users\isasi\OneDrive\Desktop\Lungs.gz')
-#resource = "https://msd-for-monai.s3-us-west-2.amazonaws.com/Task09_Spleen.tar"
 md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
 root_dir = "//home//imoreira//Data"
@@ -117,7 +114,7 @@ data_dicts = [
     {"image": image_name, "label": label_name}
     for image_name, label_name in zip(train_images, train_labels)
 ]
-train_files, val_files = data_dicts[:-3], data_dicts[-3:] #HERE
+train_files, val_files = data_dicts[:-3], data_dicts[-3:]
 #k = int(0.2*length_data)
 
 """## Set deterministic training for reproducibility"""
@@ -138,6 +135,8 @@ The image centers of negative samples must be in valid body area.
 1. `RandAffined` efficiently performs `rotate`, `scale`, `shear`, `translate`, etc. together based on PyTorch affine transform.
 1. `ToTensord` converts the numpy array to PyTorch Tensor for further steps.
 """
+
+
 
 train_transforms = Compose(
     [
@@ -333,7 +332,16 @@ with torch.no_grad():
         val_outputs = sliding_window_inference(
             val_data["image"].to(device), roi_size, sw_batch_size, model
         )
+
+        out_tensor = val_outputs
+
+        val_meta_dict_out = copy(val_data["image_meta_dict"])
+        val_meta_dict_out['path_file'] = "//home//imoreira//Output"
+        nifti_saver = NiftiSaver()
+        nifti_saver.save(out_tensor, val_meta_dict_out)
+
         # plot the slice [:, :, 80]
+        '''
         fig3=plt.figure("check", (18, 6))
         plt.subplot(1, 3, 1)
         plt.title(f"image {i}")
@@ -345,154 +353,8 @@ with torch.no_grad():
         plt.title(f"output {i}")
         plt.imshow(torch.argmax(val_outputs, dim=1).detach().cpu()[0, :, :, 80])
         plt.show()
-        fig3.savefig('image_label.tiff')
+        fig3.savefig('image_label.png')
 
-
-img_dir="//home//imoreira//JupyterExercise"
-out_dir="//home//imoreira//JupyterExercise"
-
-def arg_parser():
-    img_dir = "//home//imoreira//JupyterExercise"
-    out_dir = "//home//imoreira//JupyterExercise"
-    parser = argparse.ArgumentParser(description='merge 2d tif images into a 3d image')
-    parser.add_argument('img_dir', type=str,
-                        help='//home//imoreira//JupyterExercise')
-    parser.add_argument('out_dir', type=str,
-                        help='//home//imoreira//JupyterExercise')
-    parser.add_argument('-a', '--axis', type=int, default=2,
-                        help='axis on which to stack the 2d images')
-    return parser
-
-
-def split_filename(filepath):
-    img_dir = "//home//imoreira//JupyterExercise"
-    out_dir = "//home//imoreira//JupyterExercise"
-    path = os.path.dirname(filepath)
-    filename = os.path.basename(filepath)
-    base, ext = os.path.splitext(filename)
-    if ext == '.gz':
-        base, ext2 = os.path.splitext(base)
-        ext = ext2 + ext
-    return path, base, ext
-
-
-def main():
-    img_dir = "//home//imoreira//JupyterExercise"
-    out_dir = "//home//imoreira//JupyterExercise"
-    try:
-        args = arg_parser().parse_args()
-        img_dir = pathlib.Path(args.img_dir)
-        fns = sorted([str(fn) for fn in img_dir.glob('*.tif*')])
-        if not fns:
-            raise ValueError(f'img_dir ({args.img_dir}) does not contain any .tif or .tiff images.')
-        imgs = []
-        for fn in fns:
-            _, base, ext = split_filename(fn)
-            img = np.asarray(Image.open(fn)).astype(np.float32).squeeze()
-            if img.ndim != 2:
-                raise Exception(f'Only 2D data supported. File {base}{ext} has dimension {img.ndim}.')
-            imgs.append(img)
-        img = np.stack(imgs, axis=args.axis)
-        nib.Nifti1Image(img,None).to_filename(os.path.join(args.out_dir, f'{base}.nii.gz'))
-        return 0
-    except Exception as e:
-        print(e)
-        return 1
-
-
-if __name__ == "__main__":
-    sys.exit(main())
-
-
-'''
-ckpts = sorted(glob.glob(os.path.join(model_folder, "*.pt")))
-ckpt = ckpts[-1]
-for x in ckpts:
-    logging.info(f"available model file: {x}.")
-logging.info("----")
-logging.info(f"using {ckpt}.")
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-net = get_net().to(device)
-net.load_state_dict(torch.load(ckpt, map_location=device))
-net.eval()
-
-image_folder = os.path.abspath(data_folder)
-images = sorted(glob.glob(os.path.join(image_folder, "*_ct.nii.gz")))
-logging.info(f"infer: image ({len(images)}) folder: {data_folder}")
-infer_files = [{"image": img} for img in images]
-
-keys = ("image",)
-    infer_transforms = get_xforms("infer", keys)
-    infer_ds = monai.data.Dataset(data=infer_files, transform=infer_transforms)
-    infer_loader = monai.data.DataLoader(
-        infer_ds,
-        batch_size=1,  # image-level batch to the sliding window method, not the window-level batch
-        num_workers=2,
-        pin_memory=torch.cuda.is_available(),
-    )
-
-inferer = get_inferer()
-saver = monai.data.NiftiSaver(output_dir=prediction_folder, mode="nearest")
-with torch.no_grad():
-    for infer_data in infer_loader:
-        logging.info(f"segmenting {infer_data['image_meta_dict']['filename_or_obj']}")
-        preds = inferer(infer_data[keys[0]].to(device), net)
-        n = 1.0
-        for _ in range(4):
-            # test time augmentations
-            _img = RandGaussianNoised(keys[0], prob=1.0, std=0.01)(infer_data)[keys[0]]
-            pred = inferer(_img.to(device), net)
-            preds = preds + pred
-            n = n + 1.0
-            for dims in [[2], [3]]:
-                flip_pred = inferer(torch.flip(_img.to(device), dims=dims), net)
-                pred = torch.flip(flip_pred, dims=dims)
-                preds = preds + pred
-                n = n + 1.0
-        preds = preds / n
-        preds = (preds.argmax(dim=1, keepdims=True)).float()
-        saver.save_batch(preds, infer_data["image_meta_dict"])
-
-# copy the saved segmentations into the required folder structure for submission
-submission_dir = os.path.join(prediction_folder, "to_submit")
-if not os.path.exists(submission_dir):
-    os.makedirs(submission_dir)
-files = glob.glob(os.path.join(prediction_folder, "volume*", "*.nii.gz"))
-for f in files:
-    new_name = os.path.basename(f)
-    new_name = new_name[len("volume-covid19-A-0"):]
-    new_name = new_name[: -len("_ct_seg.nii.gz")] + ".nii.gz"
-    to_name = os.path.join(submission_dir, new_name)
-    shutil.copy(f, to_name)
-logging.info(f"predictions copied to {submission_dir}.")
-
-if __name__ == "__main__":
-"""
-Usage:
-    python run_net.py train --data_folder "COVID-19-20_v2/Train" # run the training pipeline
-    python run_net.py infer --data_folder "COVID-19-20_v2/Validation" # run the inference pipeline
-"""
-parser = argparse.ArgumentParser(description="Run a basic UNet segmentation baseline.")
-parser.add_argument(
-    "mode", metavar="mode", default="train", choices=("train", "infer"), type=str, help="mode of workflow"
-)
-parser.add_argument("--data_folder", default="", type=str, help="training data folder")
-parser.add_argument("--model_folder", default="runs", type=str, help="model folder")
-args = parser.parse_args()
-
-monai.config.print_config()
-monai.utils.set_determinism(seed=0)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-
-if args.mode == "train":
-    data_folder = args.data_folder or os.path.join("COVID-19-20_v2", "Train")
-    train(data_folder=data_folder, model_folder=args.model_folder)
-elif args.mode == "infer":
-    data_folder = args.data_folder or os.path.join("COVID-19-20_v2", "Validation")
-    infer(data_folder=data_folder, model_folder=args.model_folder)
-else:
-    raise ValueError("Unknown mode.")
 '''
 
 """## Cleanup data directory
@@ -501,4 +363,4 @@ Remove directory if a temporary was used.
 """
 
 #if directory is None:
-#    shutil.rmtree(out_dir)
+ #   shutil.rmtree(root_dir)
