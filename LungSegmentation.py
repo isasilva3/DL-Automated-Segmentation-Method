@@ -352,7 +352,7 @@ def arg_parser():
     parser.add_argument('img_dir', type=str,
                         help='//home//imoreira//JupyterExercise')
     parser.add_argument('out_dir', type=str,
-                        help='//home//imoreira//JupyterExercise//FinalNiiImages')
+                        help='//home//imoreira//JupyterExercise')
     parser.add_argument('-a', '--axis', type=int, default=2,
                         help='axis on which to stack the 2d images')
     return parser
