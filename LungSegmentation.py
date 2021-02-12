@@ -26,14 +26,17 @@ Source: Catarina
 import argparse
 import logging
 import pathlib
+from pathlib import Path
 import sys
+from glob import glob
+import os
 
-from numpy import extract, np
+import numpy as np
 
 from MONAI import monai
 from MONAI.monai.apps import extractall
-from MONAI.monai.data.image_reader import Image
-from MONAI.tests.utils import nib
+from PIL import Image
+import nibabel as nib
 
 """## Setup imports"""
 
