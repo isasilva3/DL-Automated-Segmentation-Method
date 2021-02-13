@@ -338,8 +338,9 @@ with torch.no_grad():
         val_meta_dict_out["Path_File"] = pathlib.Path('//home//imoreira//Output')
         #val_meta_dict_out["Path_File"] = pathlib.Path("C:\\Users\\isasi\\Downloads\\Output")
         nifti_saver = NiftiSaver(output_dir='//home//imoreira//Output')
-        nifti_saver.save(out_tensor, val_meta_dict_out)
-
+        #nifti_saver.save(out_tensor, val_meta_dict_out)
+        #saver.save_batch(val_outputs, val_data["img_meta_dict"])
+        nifti_saver.save_batch(out_tensor, val_meta_dict_out)
         # plot the slice [:, :, 80]
         '''
         fig3=plt.figure("check", (18, 6))
