@@ -32,31 +32,14 @@ from glob import glob
 import os
 import copy
 
-
-import numpy as np
-
-from MONAI import monai
-from MONAI.monai.apps import extractall
-from PIL import Image
-import nibabel as nib
-
 """## Setup imports"""
-
-# Copyright 2020 MONAI Consortium
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#     http://www.apache.org/licenses/LICENSE-2.0
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 import glob
 import os
 import shutil
 import tempfile
+import nibabel as nib
+import numpy as np
 
 import matplotlib.pyplot as plt
 import torch
@@ -211,7 +194,7 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=2, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
@@ -220,7 +203,7 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
@@ -235,7 +218,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 2
+epoch_num = 600
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -323,40 +306,26 @@ fig2.savefig('plot_figure.png')
 
 """## Check best model output with the input image and label"""
 
+out_dir="//home//imoreira//Data//Output"
+
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
 with torch.no_grad():
+    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Outputs')
+    saver = NiftiSaver(output_dir='home//imoreira//Segmentations')
     for i, val_data in enumerate(val_loader):
+        val_images = val_data["image"].to(device)
+        #slice_shape = np.ceil(np.asarray(val_images.shape[3:]) / 32) * 32
+        #roi_size = (20, int(slice_shape[0]), int(slice_shape[1]))
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs = sliding_window_inference(
-            val_data["image"].to(device), roi_size, sw_batch_size, model
+            val_images, roi_size, sw_batch_size, model
         )
+        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        saver.save_batch(val_outputs, val_data["image_meta_dict"])
 
-        out_tensor = val_outputs
-        val_meta_dict_out = val_data["image_meta_dict"].copy()
-        val_meta_dict_out["Path_File"] = pathlib.Path('//home//imoreira//Output')
-        #val_meta_dict_out["Path_File"] = pathlib.Path("C:\\Users\\isasi\\Downloads\\Output")
-        nifti_saver = NiftiSaver(output_dir='//home//imoreira//Output')
-        #nifti_saver.save(out_tensor, val_meta_dict_out)
-        #saver.save_batch(val_outputs, val_data["img_meta_dict"])
-        nifti_saver.save(out_tensor, val_meta_dict_out)
-        # plot the slice [:, :, 80]
-        '''
-        fig3=plt.figure("check", (18, 6))
-        plt.subplot(1, 3, 1)
-        plt.title(f"image {i}")
-        plt.imshow(val_data["image"][0, 0, :, :, 80], cmap="gray")
-        plt.subplot(1, 3, 2)
-        plt.title(f"label {i}")
-        plt.imshow(val_data["label"][0, 0, :, :, 80])
-        plt.subplot(1, 3, 3)
-        plt.title(f"output {i}")
-        plt.imshow(torch.argmax(val_outputs, dim=1).detach().cpu()[0, :, :, 80])
-        plt.show()
-        fig3.savefig('image_label.png')
 
-'''
 
 """## Cleanup data directory
 
