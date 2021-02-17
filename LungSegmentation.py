@@ -203,7 +203,7 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
-device = torch.device('cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
@@ -218,7 +218,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 600
+epoch_num = 200
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -312,7 +312,7 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Outputs')
-    saver = NiftiSaver(output_dir='home//imoreira//Segmentations')
+    saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
     for i, val_data in enumerate(val_loader):
         val_images = val_data["image"].to(device)
         #slice_shape = np.ceil(np.asarray(val_images.shape[3:]) / 32) * 32
