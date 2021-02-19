@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-"""spleen_segmentation_3d.ipynb
-
-Aut
-# Spleen 3D segmentation with MONAI
+"""
+# Lungs 3D segmentation with MONAI
 
 This tutorial shows how to integrate MONAI into an existing PyTorch medical DL program.
 
@@ -23,14 +21,6 @@ Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
 
 """
-import argparse
-import logging
-import pathlib
-from pathlib import Path
-import sys
-from glob import glob
-import os
-import copy
 
 """## Setup imports"""
 
@@ -97,8 +87,10 @@ data_dicts = [
     {"image": image_name, "label": label_name}
     for image_name, label_name in zip(train_images, train_labels)
 ]
-train_files, val_files = data_dicts[:-3], data_dicts[-3:]
-#k = int(0.2*length_data)
+n = len(data_dicts)
+#train_files, val_files = data_dicts[:-3], data_dicts[-3:]
+train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[int(n*0.2):]
+
 
 """## Set deterministic training for reproducibility"""
 
@@ -204,6 +196,7 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
@@ -218,7 +211,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 2
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -305,18 +298,17 @@ plt.show()
 fig2.savefig('plot_figure.png')
 
 """## Check best model output with the input image and label"""
+"""## Makes the Inferences """
 
-out_dir="//home//imoreira//Data//Output"
-
+out_dir = "//home//imoreira//Data//Output"
+#out_dir = "C:\\Users\\isasi\\Downloads\\Output"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
 with torch.no_grad():
-    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Outputs')
+    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
     for i, val_data in enumerate(val_loader):
         val_images = val_data["image"].to(device)
-        #slice_shape = np.ceil(np.asarray(val_images.shape[3:]) / 32) * 32
-        #roi_size = (20, int(slice_shape[0]), int(slice_shape[1]))
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs = sliding_window_inference(
@@ -324,13 +316,3 @@ with torch.no_grad():
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
-
-
-
-"""## Cleanup data directory
-
-Remove directory if a temporary was used.
-"""
-
-#if directory is None:
- #   shutil.rmtree(root_dir)
