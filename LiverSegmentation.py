@@ -172,8 +172,8 @@ plt.imshow(image[:, :, 80], cmap="gray")
 plt.subplot(1, 2, 2)
 plt.title("label")
 plt.imshow(label[:, :, 80])
-plt.show()
-fig.savefig('my_figure.png')
+#plt.show()
+#fig.savefig('my_figure.png')
 
 
 """## Define CacheDataset and DataLoader for training and validation
@@ -215,7 +215,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -301,7 +301,7 @@ y = metric_values
 plt.xlabel("epoch")
 plt.plot(x, y)
 plt.show()
-fig2.savefig('plot_figure.png')
+fig2.savefig('Liver_Plot.png')
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """

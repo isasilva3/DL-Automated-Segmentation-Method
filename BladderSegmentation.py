@@ -170,8 +170,8 @@ plt.imshow(image[:, :, 80], cmap="gray")
 plt.subplot(1, 2, 2)
 plt.title("label")
 plt.imshow(label[:, :, 80])
-plt.show()
-fig.savefig('my_figure.png')
+#plt.show()
+#fig.savefig('my_figure.png')
 
 
 """## Define CacheDataset and DataLoader for training and validation
@@ -213,7 +213,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -280,6 +280,24 @@ for epoch in range(epoch_num):
             )
 
 print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_epoch}")
+
+"""## Plot the loss and metric"""
+
+fig2=plt.figure("train", (12, 6))
+plt.subplot(1, 2, 1)
+plt.title("Epoch Average Loss")
+x = [i + 1 for i in range(len(epoch_loss_values))]
+y = epoch_loss_values
+plt.xlabel("epoch")
+plt.plot(x, y)
+plt.subplot(1, 2, 2)
+plt.title("Val Mean Dice")
+x = [val_interval * (i + 1) for i in range(len(metric_values))]
+y = metric_values
+plt.xlabel("epoch")
+plt.plot(x, y)
+plt.show()
+fig2.savefig('Bladder_Plot.png')
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """

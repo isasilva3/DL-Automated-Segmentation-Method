@@ -37,6 +37,8 @@ import torch
 from monai.apps import download_and_extract
 from monai.config import print_config
 from monai.data import CacheDataset, DataLoader, Dataset
+from monai.utils import set_determinism
+from monai.networks.nets import SegResNet
 from monai.data.nifti_saver import NiftiSaver
 from monai.inferers import sliding_window_inference
 from monai.losses import DiceLoss
@@ -45,10 +47,13 @@ from monai.networks.layers import Norm
 from monai.networks.nets import UNet
 from monai.transforms import (
     AsDiscrete,
+    AsDiscreteD,
     AddChanneld,
     Compose,
     CropForegroundd,
     LoadImaged,
+    KeepLargestConnectedComponent,
+    LabelToContour,
     Orientationd,
     RandCropByPosNegLabeld,
     ScaleIntensityRanged,
@@ -74,8 +79,8 @@ The dataset comes from http://medicaldecathlon.com/.
 
 md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
-root_dir = "//home//imoreira//Data"
-#root_dir = "C:\\Users\\isasi\\Downloads"
+#root_dir = "//home//imoreira//Data"
+root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Lungs")
 out_dir = os.path.join(root_dir, "Output")
 
@@ -110,8 +115,6 @@ The image centers of negative samples must be in valid body area.
 1. `RandAffined` efficiently performs `rotate`, `scale`, `shear`, `translate`, etc. together based on PyTorch affine transform.
 1. `ToTensord` converts the numpy array to PyTorch Tensor for further steps.
 """
-
-
 
 train_transforms = Compose(
     [
@@ -168,8 +171,8 @@ plt.imshow(image[:, :, 80], cmap="gray")
 plt.subplot(1, 2, 2)
 plt.title("label")
 plt.imshow(label[:, :, 80])
-plt.show()
-fig.savefig('my_figure.png')
+#plt.show()
+#fig.savefig('my_figure.png')
 
 
 """## Define CacheDataset and DataLoader for training and validation
@@ -195,8 +198,8 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#device = torch.device('cpu')
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
@@ -211,7 +214,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -219,6 +222,7 @@ epoch_loss_values = list()
 metric_values = list()
 post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=2)
 post_label = AsDiscrete(to_onehot=True, n_classes=2)
+
 
 for epoch in range(epoch_num):
     print("-" * 10)
@@ -258,6 +262,8 @@ for epoch in range(epoch_num):
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
+                post_transform = AsDiscreteD(keys=["image", "label"], argmax=(True, False), to_onehot=True, n_classes=3)
+                largest = KeepLargestConnectedComponent(applied_labels=[1])(post_transform)
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
@@ -279,6 +285,44 @@ for epoch in range(epoch_num):
 
 print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_epoch}")
 
+'''
+argmax = AsDiscrete(argmax=True)(val_outputs)
+fig5= plt.figure("discrete", (12, 6))
+#plt.subplots(1, 2)
+plt.subplot(1, 2, 1)
+plt.imshow(image[:, :, 80], cmap="gray")
+plt.subplot(1, 2, 2)
+plt.imshow(label[:, :, 80])
+fig5.savefig("discrete.png")
+largest = KeepLargestConnectedComponent(applied_labels=[1])(argmax)
+fig4 = plt.figure("largest", (12, 6))
+#plt.subplots(1, 2)
+plt.subplot(1, 2, 1)
+plt.imshow(image[:, :, 80], cmap="gray")
+plt.subplot(1, 2, 2)
+plt.imshow(label[:, :, 80])
+fig4.savefig("largest.png")
+
+contour = LabelToContour()(largest)
+fig6=plt.figure("contour", (12, 6))
+#plt.subplots(1, 2)
+plt.subplot(1, 2, 1)
+plt.imshow(image[:, :, 80], cmap="gray")
+plt.subplot(1, 2, 2)
+plt.imshow(label[:, :, 80], cmap="Greens")
+fig6.savefig("contour.png")
+
+map_image = contour + val_data
+fig7=plt.figure("map_image", (12, 6))
+#plt.subplots(1, 2)
+plt.subplot(1, 2, 1)
+plt.imshow(image[:, :, 80], cmap="gray")
+plt.subplot(1, 2, 2)
+plt.imshow(label[:, :, 80], cmap="gray")
+fig7.savefig("map_image.png")
+'''
+
+
 """## Plot the loss and metric"""
 
 fig2=plt.figure("train", (12, 6))
@@ -295,18 +339,19 @@ y = metric_values
 plt.xlabel("epoch")
 plt.plot(x, y)
 plt.show()
-fig2.savefig('plot_figure.png')
+fig2.savefig('Lungs_Plot.png')
+
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
 
-out_dir = "//home//imoreira//Data//Output"
-#out_dir = "C:\\Users\\isasi\\Downloads\\Output"
+#out_dir = "//home//imoreira//Data//Output"
+out_dir = "C:\\Users\\isasi\\Downloads\\Output"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
 with torch.no_grad():
-    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
-    saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
+    saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
+    #saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
     for i, val_data in enumerate(val_loader):
         val_images = val_data["image"].to(device)
         roi_size = (160, 160, 160)
@@ -314,5 +359,6 @@ with torch.no_grad():
         val_outputs = sliding_window_inference(
             val_images, roi_size, sw_batch_size, model
         )
+
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
