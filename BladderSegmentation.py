@@ -1,0 +1,302 @@
+# -*- coding: utf-8 -*-
+"""
+# Bladder 3D segmentation with MONAI
+
+This tutorial shows how to integrate MONAI into an existing PyTorch medical DL program.
+
+And easily use below features:
+1. Transforms for dictionary format data.
+1. Load Nifti image with metadata.
+1. Add channel dim to the data if no channel dimension.
+1. Scale medical image intensity with expected range.
+1. Crop out a batch of balanced images based on positive / negative label ratio.
+1. Cache IO and transforms to accelerate training and validation.
+1. 3D UNet model, Dice loss function, Mean Dice metric for 3D segmentation task.
+1. Sliding window inference method.
+1. Deterministic training for reproducibility.
+
+Target: Bladder
+Modality: CT
+Size: 10 3D volumes (8 Training + 2 Testing)
+Source: Catarina
+
+"""
+
+"""## Setup imports"""
+
+import glob
+import os
+import shutil
+import tempfile
+import nibabel as nib
+import numpy as np
+
+import matplotlib.pyplot as plt
+import torch
+
+from monai.apps import download_and_extract
+from monai.config import print_config
+from monai.data import CacheDataset, DataLoader, Dataset
+from monai.utils import set_determinism
+from monai.networks.nets import SegResNet
+from monai.data.nifti_saver import NiftiSaver
+from monai.inferers import sliding_window_inference
+from monai.losses import DiceLoss
+from monai.metrics import compute_meandice
+from monai.networks.layers import Norm
+from monai.networks.nets import UNet
+from monai.transforms import (
+    AsDiscrete,
+    AddChanneld,
+    Compose,
+    CropForegroundd,
+    LoadImaged,
+    KeepLargestConnectedComponent,
+    LabelToContour,
+    Orientationd,
+    RandCropByPosNegLabeld,
+    ScaleIntensityRanged,
+    Spacingd,
+    ToTensord,
+)
+from monai.utils import first, set_determinism
+
+print_config()
+
+"""## Setup data directory
+
+You can specify a directory with the `MONAI_DATA_DIRECTORY` environment variable.  
+This allows you to save results and reuse downloads.  
+If not specified a temporary directory will be used.
+"""
+
+"""## Download dataset
+
+Downloads and extracts the dataset.  
+The dataset comes from http://medicaldecathlon.com/.
+"""
+
+md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
+
+root_dir = "//home//imoreira//Data"
+#root_dir = "C:\\Users\\isasi\\Downloads"
+data_dir = os.path.join(root_dir, "Bladder_Data")
+out_dir = os.path.join(root_dir, "Bladder_Best_Model")
+
+"""## Set MSD Spleen dataset path"""
+
+train_images = sorted(glob.glob(os.path.join(data_dir, "imagesTr", "*.nii.gz")))
+train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
+data_dicts = [
+    {"image": image_name, "label": label_name}
+    for image_name, label_name in zip(train_images, train_labels)
+]
+n = len(data_dicts)
+#train_files, val_files = data_dicts[:-3], data_dicts[-3:]
+train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[int(n*0.2):]
+
+
+"""## Set deterministic training for reproducibility"""
+
+set_determinism(seed=0)
+
+"""## Setup transforms for training and validation
+
+Here we use several transforms to augment the dataset:
+1. `LoadImaged` loads the spleen CT images and labels from NIfTI format files.
+1. `AddChanneld` as the original data doesn't have channel dim, add 1 dim to construct "channel first" shape.
+1. `Spacingd` adjusts the spacing by `pixdim=(1.5, 1.5, 2.)` based on the affine matrix.
+1. `Orientationd` unifies the data orientation based on the affine matrix.
+1. `ScaleIntensityRanged` extracts intensity range [-57, 164] and scales to [0, 1].
+1. `CropForegroundd` removes all zero borders to focus on the valid body area of the images and labels.
+1. `RandCropByPosNegLabeld` randomly crop patch samples from big image based on pos / neg ratio.  
+The image centers of negative samples must be in valid body area.
+1. `RandAffined` efficiently performs `rotate`, `scale`, `shear`, `translate`, etc. together based on PyTorch affine transform.
+1. `ToTensord` converts the numpy array to PyTorch Tensor for further steps.
+"""
+
+train_transforms = Compose(
+    [
+        LoadImaged(keys=["image", "label"]),
+        AddChanneld(keys=["image", "label"]),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
+        ),
+        CropForegroundd(keys=["image", "label"], source_key="image"),
+        RandCropByPosNegLabeld(
+            keys=["image", "label"],
+            label_key="label",
+            spatial_size=(96, 96, 96),
+            pos=1,
+            neg=1,
+            num_samples=4,
+            image_key="image",
+            image_threshold=0,
+        ),
+        # user can also add other random transforms
+        # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
+        #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
+        ToTensord(keys=["image", "label"]),
+    ]
+)
+val_transforms = Compose(
+    [
+        LoadImaged(keys=["image", "label"]),
+        AddChanneld(keys=["image", "label"]),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
+        ),
+        CropForegroundd(keys=["image", "label"], source_key="image"),
+        ToTensord(keys=["image", "label"]),
+    ]
+)
+
+"""## Check transforms in DataLoader"""
+
+check_ds = Dataset(data=val_files, transform=val_transforms)
+check_loader = DataLoader(check_ds, batch_size=1)
+check_data = first(check_loader)
+image, label = (check_data["image"][0][0], check_data["label"][0][0])
+print(f"image shape: {image.shape}, label shape: {label.shape}")
+# plot the slice [:, :, 80]
+fig = plt.figure("check", (12, 6)) #figure size
+plt.subplot(1, 2, 1)
+plt.title("image")
+plt.imshow(image[:, :, 80], cmap="gray")
+plt.subplot(1, 2, 2)
+plt.title("label")
+plt.imshow(label[:, :, 80])
+plt.show()
+fig.savefig('my_figure.png')
+
+
+"""## Define CacheDataset and DataLoader for training and validation
+
+Here we use CacheDataset to accelerate training and validation process, it's 10x faster than the regular Dataset.  
+To achieve best performance, set `cache_rate=1.0` to cache all the data, if memory is not enough, set lower value.  
+Users can also set `cache_num` instead of `cache_rate`, will use the minimum value of the 2 settings.  
+And set `num_workers` to enable multi-threads during caching.  
+If want to to try the regular Dataset, just change to use the commented code below.
+"""
+
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
+# train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
+
+# use batch_size=2 to load images and use RandCropByPosNegLabeld
+# to generate 2 x 4 images for network training
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
+
+val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
+# val_ds = Dataset(data=val_files, transform=val_transforms)
+val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
+
+"""## Create Model, Loss, Optimizer"""
+
+# standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cpu')
+model = UNet(
+    dimensions=3,
+    in_channels=1,
+    out_channels=2,
+    channels=(16, 32, 64, 128, 256),
+    strides=(2, 2, 2, 2),
+    num_res_units=2,
+    norm=Norm.BATCH,
+).to(device)
+loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+optimizer = torch.optim.Adam(model.parameters(), 1e-4)
+
+"""## Execute a typical PyTorch training process"""
+
+epoch_num = 3
+val_interval = 2
+best_metric = -1
+best_metric_epoch = -1
+epoch_loss_values = list()
+metric_values = list()
+post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=2)
+post_label = AsDiscrete(to_onehot=True, n_classes=2)
+
+for epoch in range(epoch_num):
+    print("-" * 10)
+    print(f"epoch {epoch + 1}/{epoch_num}")
+    model.train()
+    epoch_loss = 0
+    step = 0
+    for batch_data in train_loader:
+        step += 1
+        inputs, labels = (
+            batch_data["image"].to(device),
+            batch_data["label"].to(device),
+        )
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = loss_function(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        epoch_loss += loss.item()
+        print(f"{step}/{len(train_ds) // train_loader.batch_size}, train_loss: {loss.item():.4f}")
+    epoch_loss /= step
+    epoch_loss_values.append(epoch_loss)
+    print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")
+
+    if (epoch + 1) % val_interval == 0:
+        model.eval()
+        with torch.no_grad():
+            metric_sum = 0.0
+            metric_count = 0
+            for val_data in val_loader:
+                val_inputs, val_labels = (
+                    val_data["image"].to(device),
+                    val_data["label"].to(device),
+                )
+                roi_size = (160, 160, 160)
+                sw_batch_size = 4
+                val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
+                val_outputs = post_pred(val_outputs)
+                val_labels = post_label(val_labels)
+                value = compute_meandice(
+                    y_pred=val_outputs,
+                    y=val_labels,
+                    include_background=False,
+                )
+                metric_count += len(value)
+                metric_sum += value.sum().item()
+            metric = metric_sum / metric_count
+            metric_values.append(metric)
+            if metric > best_metric:
+                best_metric = metric
+                best_metric_epoch = epoch + 1
+                torch.save(model.state_dict(), os.path.join(out_dir, "best_metric_model.pth"))
+                print("saved new best metric model")
+            print(
+                f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
+                f"\nbest mean dice: {best_metric:.4f} at epoch: {best_metric_epoch}"
+            )
+
+print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_epoch}")
+
+"""## Check best model output with the input image and label"""
+"""## Makes the Inferences """
+
+out_dir = "//home//imoreira//Data//Bladder_Best_Model"
+#out_dir = "C:\\Users\\isasi\\Downloads\\Bladder_Best_Model"
+model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
+model.eval()
+with torch.no_grad():
+    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
+    saver = NiftiSaver(output_dir='//home//imoreira//Bladder_Segs_Out')
+    for i, val_data in enumerate(val_loader):
+        val_images = val_data["image"].to(device)
+        roi_size = (160, 160, 160)
+        sw_batch_size = 4
+        val_outputs = sliding_window_inference(
+            val_images, roi_size, sw_batch_size, model
+        )
+        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        saver.save_batch(val_outputs, val_data["image_meta_dict"])
