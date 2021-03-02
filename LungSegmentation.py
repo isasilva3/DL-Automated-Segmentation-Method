@@ -120,22 +120,22 @@ train_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
         AddChanneld(keys=["image", "label"]),
-        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
+        #Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         CropForegroundd(keys=["image", "label"], source_key="image"),
-        RandCropByPosNegLabeld(
-            keys=["image", "label"],
-            label_key="label",
-            spatial_size=(96, 96, 96),
-            pos=1,
-            neg=1,
-            num_samples=4,
-            image_key="image",
-            image_threshold=0,
-        ),
+        #RandCropByPosNegLabeld(
+         #   keys=["image", "label"],
+          #  label_key="label",
+           # spatial_size=(96, 96, 96),
+           # pos=1,
+           # neg=1,
+           # num_samples=4,
+           # image_key="image",
+           # image_threshold=0,
+        #),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -146,8 +146,8 @@ val_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
         AddChanneld(keys=["image", "label"]),
-        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
+        #Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
             keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
         ),
@@ -262,8 +262,8 @@ for epoch in range(epoch_num):
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
-                post_transform = AsDiscreteD(keys=["image", "label"], argmax=(True, False), to_onehot=True, n_classes=3)
-                largest = KeepLargestConnectedComponent(applied_labels=[1])(post_transform)
+                #post_transform = AsDiscreteD(keys=["image", "label"], argmax=(True, False), to_onehot=True, n_classes=3)
+                largest = KeepLargestConnectedComponent(applied_labels=[1])
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
@@ -361,4 +361,5 @@ with torch.no_grad():
         )
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        val_outputs = largest(val_outputs)
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
