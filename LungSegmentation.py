@@ -79,8 +79,8 @@ The dataset comes from http://medicaldecathlon.com/.
 
 md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
-#root_dir = "//home//imoreira//Data"
-root_dir = "C:\\Users\\isasi\\Downloads"
+root_dir = "//home//imoreira//Data"
+#root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Lungs")
 out_dir = os.path.join(root_dir, "Output")
 
@@ -198,8 +198,8 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
@@ -345,13 +345,13 @@ fig2.savefig('Lungs_Plot.png')
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
 
-#out_dir = "//home//imoreira//Data//Output"
-out_dir = "C:\\Users\\isasi\\Downloads\\Output"
+out_dir = "//home//imoreira//Data//Output"
+#out_dir = "C:\\Users\\isasi\\Downloads\\Output"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
 with torch.no_grad():
-    saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
-    #saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
+    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
+    saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
     for i, val_data in enumerate(val_loader):
         val_images = val_data["image"].to(device)
         roi_size = (160, 160, 160)
