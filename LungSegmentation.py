@@ -123,7 +123,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
         ),
         CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
