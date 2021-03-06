@@ -214,7 +214,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -263,7 +263,7 @@ for epoch in range(epoch_num):
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
                 #post_transform = AsDiscreteD(keys=["image", "label"], argmax=(True, False), to_onehot=True, n_classes=3)
-                #largest = KeepLargestConnectedComponent(applied_labels=[1])
+                largest = 2 * KeepLargestConnectedComponent(applied_labels=[1]) #EXPERIMENTAR
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
@@ -285,42 +285,6 @@ for epoch in range(epoch_num):
 
 print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_epoch}")
 
-'''
-argmax = AsDiscrete(argmax=True)(val_outputs)
-fig5= plt.figure("discrete", (12, 6))
-#plt.subplots(1, 2)
-plt.subplot(1, 2, 1)
-plt.imshow(image[:, :, 80], cmap="gray")
-plt.subplot(1, 2, 2)
-plt.imshow(label[:, :, 80])
-fig5.savefig("discrete.png")
-largest = KeepLargestConnectedComponent(applied_labels=[1])(argmax)
-fig4 = plt.figure("largest", (12, 6))
-#plt.subplots(1, 2)
-plt.subplot(1, 2, 1)
-plt.imshow(image[:, :, 80], cmap="gray")
-plt.subplot(1, 2, 2)
-plt.imshow(label[:, :, 80])
-fig4.savefig("largest.png")
-
-contour = LabelToContour()(largest)
-fig6=plt.figure("contour", (12, 6))
-#plt.subplots(1, 2)
-plt.subplot(1, 2, 1)
-plt.imshow(image[:, :, 80], cmap="gray")
-plt.subplot(1, 2, 2)
-plt.imshow(label[:, :, 80], cmap="Greens")
-fig6.savefig("contour.png")
-
-map_image = contour + val_data
-fig7=plt.figure("map_image", (12, 6))
-#plt.subplots(1, 2)
-plt.subplot(1, 2, 1)
-plt.imshow(image[:, :, 80], cmap="gray")
-plt.subplot(1, 2, 2)
-plt.imshow(label[:, :, 80], cmap="gray")
-fig7.savefig("map_image.png")
-'''
 
 
 """## Plot the loss and metric"""
@@ -361,5 +325,5 @@ with torch.no_grad():
         )
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        #val_outputs = largest(val_outputs)
+        val_outputs = largest(val_outputs)
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
