@@ -262,6 +262,7 @@ for epoch in range(epoch_num):
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
+                largest = KeepLargestConnectedComponent(applied_labels=[1])
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
@@ -321,6 +322,7 @@ with torch.no_grad():
             val_images, roi_size, sw_batch_size, model
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        val_outputs = largest(val_outputs)
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
 
 
