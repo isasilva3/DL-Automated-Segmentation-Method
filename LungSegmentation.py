@@ -120,7 +120,7 @@ train_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
         AddChanneld(keys=["image", "label"]),
-        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
             keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
@@ -146,7 +146,7 @@ val_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
         AddChanneld(keys=["image", "label"]),
-        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
             keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
@@ -214,7 +214,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -263,7 +263,7 @@ for epoch in range(epoch_num):
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
                 #post_transform = AsDiscreteD(keys=["image", "label"], argmax=(True, False), to_onehot=True, n_classes=3)
-                largest = KeepLargestConnectedComponent(applied_labels=[1])
+                #largest = KeepLargestConnectedComponent(applied_labels=[1])
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
