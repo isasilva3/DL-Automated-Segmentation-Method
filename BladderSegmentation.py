@@ -124,7 +124,7 @@ train_transforms = Compose(
         ScaleIntensityRanged(
             keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
         ),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
             keys=["image", "label"],
             label_key="label",
@@ -150,7 +150,7 @@ val_transforms = Compose(
         ScaleIntensityRanged(
             keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
         ),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
     ]
 )
@@ -213,7 +213,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 100
+epoch_num = 300
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
