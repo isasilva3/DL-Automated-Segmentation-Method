@@ -361,5 +361,5 @@ with torch.no_grad():
         )
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        val_outputs = largest(val_outputs)
+        #val_outputs = largest(val_outputs)
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
