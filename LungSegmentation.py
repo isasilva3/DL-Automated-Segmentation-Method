@@ -125,7 +125,7 @@ train_transforms = Compose(
         ScaleIntensityRanged(
             keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
         ),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
            keys=["image", "label"],
            label_key="label",
@@ -151,7 +151,7 @@ val_transforms = Compose(
         ScaleIntensityRanged(
             keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
         ),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
     ]
 )
