@@ -62,6 +62,8 @@ from monai.transforms import (
 )
 from monai.utils import first, set_determinism
 
+from skimage.measure import regionprops
+
 print_config()
 
 """## Setup data directory
@@ -214,7 +216,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 100
+epoch_num = 30
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -262,8 +264,6 @@ for epoch in range(epoch_num):
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
-                #post_transform = AsDiscreteD(keys=["image", "label"], argmax=(True, False), to_onehot=True, n_classes=3)
-                largest = 2 * KeepLargestConnectedComponent(applied_labels=[1]) #EXPERIMENTAR
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
@@ -284,8 +284,6 @@ for epoch in range(epoch_num):
             )
 
 print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_epoch}")
-
-
 
 """## Plot the loss and metric"""
 
@@ -325,5 +323,15 @@ with torch.no_grad():
         )
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        val_outputs = largest(val_outputs)
+
+        # Keep the labels with 2 largest areas
+        areas = [r.area for r in regionprops(val_outputs)]
+        areas.sort()
+        if len(areas) > 2:
+            for region in regionprops(val_outputs):
+                if region.area < areas[-2]:
+                    for coordinates in region.coords:
+                        val_outputs[coordinates[0], coordinates[1]] = 0
+        binary = val_outputs > 0
+
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
