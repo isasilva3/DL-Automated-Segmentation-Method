@@ -125,7 +125,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -151,7 +151,7 @@ val_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -216,7 +216,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 30
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -325,13 +325,15 @@ with torch.no_grad():
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
 
         # Keep the labels with 2 largest areas
-        areas = [r.area for r in regionprops(val_data)]
-        areas.sort()
-        if len(areas) > 2:
-            for region in regionprops(val_data):
-                if region.area < areas[-2]:
-                    for coordinates in region.coords:
-                        val_data[coordinates[0], coordinates[1]] = 0
-        binary = val_data > 0
+        #areas = [r.area for r in regionprops(val_outputs)]
+        #areas.sort()
+        #if len(areas) > 2:
+        #    for region in regionprops(val_outputs):
+        #        if region.area < areas[-2]:
+        #            for coordinates in region.coords:
+        #                val_data[coordinates[0], coordinates[1]] = 0
+        #binary = val_outputs > 0
 
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
+
+
