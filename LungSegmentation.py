@@ -325,13 +325,13 @@ with torch.no_grad():
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
 
         # Keep the labels with 2 largest areas
-        areas = [r.area for r in regionprops(val_outputs)]
+        areas = [r.area for r in regionprops(val_data)]
         areas.sort()
         if len(areas) > 2:
-            for region in regionprops(val_outputs):
+            for region in regionprops(val_data):
                 if region.area < areas[-2]:
                     for coordinates in region.coords:
-                        val_outputs[coordinates[0], coordinates[1]] = 0
-        binary = val_outputs > 0
+                        val_data[coordinates[0], coordinates[1]] = 0
+        binary = val_data > 0
 
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
