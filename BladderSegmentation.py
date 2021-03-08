@@ -122,7 +122,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -148,7 +148,7 @@ val_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -309,7 +309,7 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Bladder_Segs_Out')
+    saver = NiftiSaver(output_dir='//home//imoreira//Bladder_Ex')
     for i, val_data in enumerate(val_loader):
         val_images = val_data["image"].to(device)
         roi_size = (160, 160, 160)
