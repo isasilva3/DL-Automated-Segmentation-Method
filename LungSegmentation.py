@@ -202,8 +202,8 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#device = torch.device('cpu')
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
@@ -265,6 +265,9 @@ for epoch in range(epoch_num):
                 sw_batch_size = 4
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
+
+                largest = KeepLargestConnectedComponent(applied_labels=[1])
+
                 val_labels = post_label(val_labels)
                 value = compute_meandice(
                     y_pred=val_outputs,
@@ -305,7 +308,7 @@ plt.plot(x, y)
 plt.show()
 fig2.savefig('Lungs_Plot.png')
 
-
+'''
 def largest_label_volume(im, bg=-1):
     vals, counts = np.unique(im, return_counts=True)
     counts = counts[vals != bg]
@@ -344,7 +347,7 @@ def segment_lungs(image, fill_lung_structures=True):
         binary_image[labels != l_max] = 0
 
     return binary_image
-
+'''
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
@@ -365,8 +368,9 @@ with torch.no_grad():
         )
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        val_outputs = largest_label_volume(val_outputs)
-        val_outputs = segment_lungs(val_outputs)
+        first_lung = largest(val_outputs)
+        both_lungs = largest(val_outputs) - first_lung
+        both_lungs = val_outputs
 
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
 
