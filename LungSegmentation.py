@@ -21,6 +21,8 @@ Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
 
 """
+import numpy
+from skimage.viewer.plugins import measure
 
 """## Setup imports"""
 
@@ -216,7 +218,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 10
+epoch_num = 5
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -304,6 +306,46 @@ plt.show()
 fig2.savefig('Lungs_Plot.png')
 
 
+def largest_label_volume(im, bg=-1):
+    vals, counts = np.unique(im, return_counts=True)
+    counts = counts[vals != bg]
+    vals = vals[vals != bg]
+    return vals[np.argmax(counts)] if counts.any() else None
+
+
+def segment_lungs(image, fill_lung_structures=True):
+    # Threshold so that 1 is background, 2 is lung structure
+    binary_image = np.array(image > -320, dtype=np.int8)+1
+    # Label connected regions of mask
+    labels = measure.label(binary_image)
+    # Pick voxel in corner to determine label for air
+    background_label = labels[0, 0, 0]
+    # Fill air around person in binary image
+    binary_image[background_label == labels] = 2
+
+    if fill_lung_structures:
+        for i, axial_slice in enumerate(binary_image):
+            # Back to 0s and 1s
+            axial_slice = axial_slice - 1
+            # Label connected regions in slice
+            labeling = measure.label(axial_slice)
+            # Find largest connected region, indicating presence of lung tissue
+            l_max = largest_label_volume(labeling, bg=0)
+            if l_max is not None:
+                binary_image[i][labeling != l_max] = 1
+
+    # Back to 0s and 1s; and invert
+    binary_image -= 1
+    binary_image = 1 - binary_image
+
+    labels = measure.label(binary_image, background=0)
+    l_max = largest_label_volume(labels, bg=0)
+    if l_max is not None:
+        binary_image[labels != l_max] = 0
+
+    return binary_image
+
+
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
 
@@ -323,17 +365,8 @@ with torch.no_grad():
         )
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-
-        # Keep the labels with 2 largest areas
-        #areas = [r.area for r in regionprops(val_outputs)]
-        #areas.sort()
-        #if len(areas) > 2:
-        #    for region in regionprops(val_outputs):
-        #        if region.area < areas[-2]:
-        #            for coordinates in region.coords:
-        #                val_data[coordinates[0], coordinates[1]] = 0
-        #binary = val_outputs > 0
-
+        val_outputs = largest_label_volume(val_outputs)
+        val_outputs = segment_lungs(val_outputs)
 
         saver.save_batch(val_outputs, val_data["image_meta_dict"])
 
