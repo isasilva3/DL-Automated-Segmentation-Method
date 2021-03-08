@@ -369,9 +369,9 @@ with torch.no_grad():
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         first_lung = largest(val_outputs)
-        both_lungs = largest(val_outputs - first_lung)
-        both_lungs = val_outputs
+        second_lung = largest(val_outputs - first_lung)
+        both_lungs = first_lung + second_lung
 
-        saver.save_batch(val_outputs, val_data["image_meta_dict"])
+        saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
 
