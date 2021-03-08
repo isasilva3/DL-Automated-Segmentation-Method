@@ -313,7 +313,7 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Liver_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Liver_Ex')
+    saver = NiftiSaver(output_dir='//home//imoreira//Liver_Segs_Out')
     for i, val_data in enumerate(val_loader):
         val_images = val_data["image"].to(device)
         roi_size = (160, 160, 160)
