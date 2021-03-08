@@ -218,7 +218,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 3
+epoch_num = 30
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -366,6 +366,7 @@ with torch.no_grad():
         val_outputs = sliding_window_inference(
             val_images, roi_size, sw_batch_size, model
         )
+
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         first_lung = largest(val_outputs)

@@ -197,8 +197,8 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
@@ -213,7 +213,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 30
+epoch_num = 300
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
