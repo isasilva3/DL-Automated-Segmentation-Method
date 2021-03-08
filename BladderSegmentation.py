@@ -125,16 +125,16 @@ train_transforms = Compose(
             keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
-        RandCropByPosNegLabeld(
-            keys=["image", "label"],
-            label_key="label",
-            spatial_size=(96, 96, 96),
-            pos=1,
-            neg=1,
-            num_samples=4,
-            image_key="image",
-            image_threshold=0,
-        ),
+        #RandCropByPosNegLabeld(
+        #    keys=["image", "label"],
+        #    label_key="label",
+        #    spatial_size=(96, 96, 96),
+        #    pos=1,
+        #    neg=1,
+        #    num_samples=4,
+        #    image_key="image",
+        #    image_threshold=0,
+        #),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -213,7 +213,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 30
+epoch_num = 300
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -299,6 +299,7 @@ plt.xlabel("epoch")
 plt.plot(x, y)
 plt.show()
 fig2.savefig('Bladder_Plot.png')
+
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
