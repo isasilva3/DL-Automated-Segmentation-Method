@@ -127,16 +127,16 @@ train_transforms = Compose(
             keys=["image"], a_min=-160, a_max=60, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
-        #RandCropByPosNegLabeld(
-        #    keys=["image", "label"],
-        #    label_key="label",
-        #    spatial_size=(96, 96, 96),
-        #    pos=1,
-        #    neg=1,
-        #    num_samples=4,
-        #    image_key="image",
-        #    image_threshold=0,
-        #),
+        RandCropByPosNegLabeld(
+            keys=["image", "label"],
+            label_key="label",
+            spatial_size=(96, 96, 96),
+            pos=1,
+            neg=1,
+            num_samples=4,
+            image_key="image",
+            image_threshold=0,
+        ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -215,7 +215,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 30
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
