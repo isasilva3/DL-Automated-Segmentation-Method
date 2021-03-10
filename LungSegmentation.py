@@ -64,7 +64,7 @@ from monai.transforms import (
 )
 from monai.utils import first, set_determinism
 
-from skimage.measure import regionprops
+from skimage import measure
 
 print_config()
 
@@ -308,7 +308,8 @@ plt.plot(x, y)
 plt.show()
 fig2.savefig('Lungs_Plot.png')
 
-'''
+
+
 def largest_label_volume(im, bg=-1):
     vals, counts = np.unique(im, return_counts=True)
     counts = counts[vals != bg]
@@ -316,41 +317,9 @@ def largest_label_volume(im, bg=-1):
     return vals[np.argmax(counts)] if counts.any() else None
 
 
-def segment_lungs(image, fill_lung_structures=True):
-    # Threshold so that 1 is background, 2 is lung structure
-    binary_image = np.array(image > -320, dtype=np.int8)+1
-    # Label connected regions of mask
-    labels = measure.label(binary_image)
-    # Pick voxel in corner to determine label for air
-    background_label = labels[0, 0, 0]
-    # Fill air around person in binary image
-    binary_image[background_label == labels] = 2
-
-    if fill_lung_structures:
-        for i, axial_slice in enumerate(binary_image):
-            # Back to 0s and 1s
-            axial_slice = axial_slice - 1
-            # Label connected regions in slice
-            labeling = measure.label(axial_slice)
-            # Find largest connected region, indicating presence of lung tissue
-            l_max = largest_label_volume(labeling, bg=0)
-            if l_max is not None:
-                binary_image[i][labeling != l_max] = 1
-
-    # Back to 0s and 1s; and invert
-    binary_image -= 1
-    binary_image = 1 - binary_image
-
-    labels = measure.label(binary_image, background=0)
-    l_max = largest_label_volume(labels, bg=0)
-    if l_max is not None:
-        binary_image[labels != l_max] = 0
-
-    return binary_image
-'''
-
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
+
 
 out_dir = "//home//imoreira//Data//Output"
 #out_dir = "C:\\Users\\isasi\\Downloads\\Output"
@@ -367,16 +336,42 @@ with torch.no_grad():
             val_images, roi_size, sw_batch_size, model
         )
 
+        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
 
+        val_outputs = np.array(image > -320, dtype=np.int8) + 1
+        labels = measure.label(val_outputs)
+        background_label = labels[0, 0, 0]
+        val_outputs[background_label == labels] = 2
+
+        fill_lung_structures = True
+
+        if fill_lung_structures:
+            for i, axial_slice in enumerate(val_outputs):
+                # Back to 0s and 1s
+                axial_slice = axial_slice - 1
+                # Label connected regions in slice
+                labeling = measure.label(axial_slice)
+                # Find largest connected region, indicating presence of lung tissue
+                l_max = largest_label_volume(labeling, bg=0)
+                if l_max is not None:
+                    val_outputs[i][labeling != l_max] = 1
+
+        # Back to 0s and 1s; and invert
+        val_outputs -= 1
+        val_outputs = 1 - val_outputs
+
+        labels = measure.label(val_outputs, background=0)
+        l_max = largest_label_volume(labels, bg=0)
+        if l_max is not None:
+            val_outputs[labels != l_max] = 0
 
         #if largest(val_outputs) >= 2000
-        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        first_lung = largest(val_outputs)
-        both_lungs = largest(val_outputs - first_lung)
-            #both_lungs = first_lung + second_lung
+        #first_lung = largest(val_outputs)
+        #second_lung = largest(val_outputs - first_lung)
+        #both_lungs = first_lung + second_lung
         #else:
             #both_lungs = largest(val_outputs)
 
-        saver.save_batch(both_lungs, val_data["image_meta_dict"])
+        saver.save_batch(val_outputs, val_data["image_meta_dict"])
 
 
