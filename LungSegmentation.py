@@ -218,7 +218,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 5
+epoch_num = 300
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -309,35 +309,7 @@ plt.show()
 fig2.savefig('Lungs_Plot.png')
 
 
-
-def largest_label_volume(im, bg=-1):
-    vals, counts = np.unique(im, return_counts=True)
-    counts = counts[vals != bg]
-    vals = vals[vals != bg]
-    return vals[np.argmax(counts)] if counts.any() else None
-
-
-"""## Check best model output with the input image and label"""
-"""## Makes the Inferences """
-
-
-out_dir = "//home//imoreira//Data//Output"
-#out_dir = "C:\\Users\\isasi\\Downloads\\Output"
-model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
-model.eval()
-with torch.no_grad():
-    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
-    saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
-    for i, val_data in enumerate(val_loader):
-        val_images = val_data["image"].to(device)
-        roi_size = (160, 160, 160)
-        sw_batch_size = 4
-        val_outputs = sliding_window_inference(
-            val_images, roi_size, sw_batch_size, model
-        )
-
-        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-
+'''
         val_outputs = np.array(image > -320, dtype=np.int8) + 1
         labels = measure.label(val_outputs)
         background_label = labels[0, 0, 0]
@@ -364,14 +336,37 @@ with torch.no_grad():
         l_max = largest_label_volume(labels, bg=0)
         if l_max is not None:
             val_outputs[labels != l_max] = 0
+'''
 
+
+
+"""## Check best model output with the input image and label"""
+"""## Makes the Inferences """
+
+
+out_dir = "//home//imoreira//Data//Output"
+#out_dir = "C:\\Users\\isasi\\Downloads\\Output"
+model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
+model.eval()
+with torch.no_grad():
+    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
+    saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
+    for i, val_data in enumerate(val_loader):
+        val_images = val_data["image"].to(device)
+        roi_size = (160, 160, 160)
+        sw_batch_size = 4
+        val_outputs = sliding_window_inference(
+            val_images, roi_size, sw_batch_size, model
+        )
+
+        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         #if largest(val_outputs) >= 2000
-        #first_lung = largest(val_outputs)
-        #second_lung = largest(val_outputs - first_lung)
-        #both_lungs = first_lung + second_lung
+        first_lung = largest(val_outputs)
+        second_lung = largest(val_outputs - first_lung)
+        both_lungs = first_lung + second_lung
         #else:
             #both_lungs = largest(val_outputs)
 
-        saver.save_batch(val_outputs, val_data["image_meta_dict"])
+        saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
 
