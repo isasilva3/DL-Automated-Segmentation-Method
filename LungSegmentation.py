@@ -362,8 +362,9 @@ with torch.no_grad():
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         #if largest(val_outputs) >= 2000
         first_lung = largest(val_outputs)
-        second_lung = largest(val_outputs) - first_lung
+        second_lung = largest(val_outputs - first_lung)
         both_lungs = first_lung + second_lung
+
         #else:
             #both_lungs = largest(val_outputs)
 
