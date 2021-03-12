@@ -127,7 +127,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -153,9 +153,9 @@ val_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
         ),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
     ]
 )
@@ -218,7 +218,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 30
+epoch_num = 15
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -331,13 +331,13 @@ with torch.no_grad():
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         #if largest(val_outputs) >= 2000
-        #first_lung = largest(val_outputs)
-        #second_lung = largest(val_outputs - first_lung)
-        #both_lungs = first_lung + second_lung
+        first_lung = largest(val_outputs)
+        second_lung = largest(val_outputs - first_lung)
+        both_lungs = first_lung + second_lung
         #val_outputs = both_lungs
         #else:
             #both_lungs = largest(val_outputs)
 
-        saver.save_batch(val_outputs, val_data["image_meta_dict"])
+        saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
 
