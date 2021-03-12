@@ -218,7 +218,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 30
+epoch_num = 15
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -363,11 +363,11 @@ with torch.no_grad():
         #if largest(val_outputs) >= 2000
         first_lung = largest(val_outputs)
         second_lung = largest(val_outputs - first_lung)
-        #both_lungs = first_lung + second_lung
-
+        both_lungs = first_lung + second_lung
+        val_outputs = both_lungs
         #else:
             #both_lungs = largest(val_outputs)
 
-        saver.save_batch(second_lung, val_data["image_meta_dict"])
+        saver.save_batch(val_outputs, val_data["image_meta_dict"])
 
 
