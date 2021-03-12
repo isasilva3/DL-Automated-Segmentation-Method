@@ -127,7 +127,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-57, a_max=164, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -307,36 +307,6 @@ plt.xlabel("epoch")
 plt.plot(x, y)
 plt.show()
 fig2.savefig('Lungs_Plot.png')
-
-
-'''
-        val_outputs = np.array(image > -320, dtype=np.int8) + 1
-        labels = measure.label(val_outputs)
-        background_label = labels[0, 0, 0]
-        val_outputs[background_label == labels] = 2
-
-        fill_lung_structures = True
-
-        if fill_lung_structures:
-            for i, axial_slice in enumerate(val_outputs):
-                # Back to 0s and 1s
-                axial_slice = axial_slice - 1
-                # Label connected regions in slice
-                labeling = measure.label(axial_slice)
-                # Find largest connected region, indicating presence of lung tissue
-                l_max = largest_label_volume(labeling, bg=0)
-                if l_max is not None:
-                    val_outputs[i][labeling != l_max] = 1
-
-        # Back to 0s and 1s; and invert
-        val_outputs -= 1
-        val_outputs = 1 - val_outputs
-
-        labels = measure.label(val_outputs, background=0)
-        l_max = largest_label_volume(labels, bg=0)
-        if l_max is not None:
-            val_outputs[labels != l_max] = 0
-'''
 
 
 
