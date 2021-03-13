@@ -221,7 +221,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 15
+epoch_num = 200
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -340,11 +340,11 @@ with torch.no_grad():
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         #if largest(val_outputs) >= 2000
-        #first_lung = largest(val_outputs)
-        #second_lung = val_outputs - first_lung
+        first_lung = largest(val_outputs)
+        second_lung = largest(val_outputs - first_lung)
         #second_largest = largest(second_lung)
-        #both_lungs = first_lung + second_largest
-        #val_outputs = both_lungs
+        both_lungs = first_lung + second_lung
+        val_outputs = both_lungs
         #else:
             #both_lungs = largest(val_outputs)
 
@@ -352,10 +352,10 @@ with torch.no_grad():
 
         #labels_out = cc3d.connected_components(val_outputs)  # 26-connected
 
-        connectivity = 6  # only 4,8 (2D) and 26, 18, and 6 (3D) are allowed
-        labels_out = cc3d.connected_components(val_outputs, connectivity=connectivity)
+        #connectivity = 6  # only 4,8 (2D) and 26, 18, and 6 (3D) are allowed
+        #labels_out = cc3d.connected_components(val_outputs, connectivity=connectivity)
 
-        saver.save_batch(labels_out, val_data["image_meta_dict"])
+        saver.save_batch(val_outputs, val_data["image_meta_dict"])
 
 
 
