@@ -65,6 +65,7 @@ from monai.transforms import (
 from monai.utils import first, set_determinism
 
 from skimage import measure
+from skimage.measure import label
 
 print_config()
 
@@ -309,6 +310,12 @@ plt.show()
 fig2.savefig('Lungs_Plot.png')
 
 
+def getLargestCC(segmentation):
+    labels = label(segmentation)
+    assert( labels.max() != 0 ) # assume at least 1 CC
+    largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
+    return largestCC
+
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
@@ -339,9 +346,8 @@ with torch.no_grad():
         #else:
             #both_lungs = largest(val_outputs)
 
-        labels = label(val_outputs)
-        largestCC = labels == np.argmax(np.bincount(labels.flat))
+        lung = getLargestCC(val_outputs)
 
-        saver.save_batch(largestCC, val_data["image_meta_dict"])
+        saver.save_batch(lung, val_data["image_meta_dict"])
 
 
