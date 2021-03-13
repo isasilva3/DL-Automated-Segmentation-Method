@@ -127,7 +127,7 @@ train_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
         AddChanneld(keys=["image", "label"]),
-        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
             keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
@@ -153,7 +153,7 @@ val_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
         AddChanneld(keys=["image", "label"]),
-        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 1.5), mode=("bilinear", "nearest")),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
             keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
@@ -334,16 +334,22 @@ with torch.no_grad():
         val_images = val_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
-        val_outputs = sliding_window_inference(
+        val_outputs_1 = sliding_window_inference(
             val_images, roi_size, sw_batch_size, model
         )
 
-        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        val_outputs_2 = sliding_window_inference(
+            val_images, roi_size, sw_batch_size, model
+        )
+
+        val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
+        val_outputs_2 = val_outputs_2.argmax(dim=1, keepdim=True)
+
         #if largest(val_outputs) >= 2000
-        #first_lung = largest(val_outputs)
-        #second_lung = largest(val_outputs - first_lung)
+        first_lung = largest(val_outputs_1)
+        second_lung = largest(val_outputs_2 - first_lung)
         #second_largest = largest(second_lung)
-        #both_lungs = first_lung + second_lung
+        both_lungs = first_lung + second_lung
         #val_outputs = both_lungs
         #else:
             #both_lungs = largest(val_outputs)
@@ -355,7 +361,7 @@ with torch.no_grad():
         #connectivity = 6  # only 4,8 (2D) and 26, 18, and 6 (3D) are allowed
         #labels_out = cc3d.connected_components(val_outputs, connectivity=connectivity)
 
-        saver.save_batch(val_outputs, val_data["image_meta_dict"])
+        saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
 
 
