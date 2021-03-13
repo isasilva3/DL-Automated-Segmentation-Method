@@ -341,10 +341,10 @@ with torch.no_grad():
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         #if largest(val_outputs) >= 2000
         first_lung = largest(val_outputs)
-        second_lung = largest(val_outputs - first_lung)
+        second_lung = val_outputs - first_lung
         #second_largest = largest(second_lung)
         both_lungs = first_lung + second_lung
-        val_outputs = both_lungs
+        #val_outputs = both_lungs
         #else:
             #both_lungs = largest(val_outputs)
 
@@ -355,7 +355,7 @@ with torch.no_grad():
         #connectivity = 6  # only 4,8 (2D) and 26, 18, and 6 (3D) are allowed
         #labels_out = cc3d.connected_components(val_outputs, connectivity=connectivity)
 
-        saver.save_batch(val_outputs, val_data["image_meta_dict"])
+        saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
 
 
