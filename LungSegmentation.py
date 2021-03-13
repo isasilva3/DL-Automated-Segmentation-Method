@@ -350,10 +350,10 @@ with torch.no_grad():
 
         #lung = getLargestCC(val_outputs)
 
-        labels_out = cc3d.connected_components(val_outputs)  # 26-connected
+        #labels_out = cc3d.connected_components(val_outputs)  # 26-connected
 
-        #connectivity = 6  # only 4,8 (2D) and 26, 18, and 6 (3D) are allowed
-        #labels_out = cc3d.connected_components(val_outputs, connectivity=connectivity)
+        connectivity = 6  # only 4,8 (2D) and 26, 18, and 6 (3D) are allowed
+        labels_out = cc3d.connected_components(val_outputs, connectivity=connectivity)
 
         saver.save_batch(labels_out, val_data["image_meta_dict"])
 
