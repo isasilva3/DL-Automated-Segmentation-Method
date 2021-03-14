@@ -221,7 +221,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 5
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -354,12 +354,9 @@ with torch.no_grad():
         #else:
             #both_lungs = largest(val_outputs)
 
-        #lung = getLargestCC(val_outputs)
+        volume = measure.label(val_outputs_1)
+        print("The measure is:", volume)
 
-        #labels_out = cc3d.connected_components(val_outputs)  # 26-connected
-
-        #connectivity = 6  # only 4,8 (2D) and 26, 18, and 6 (3D) are allowed
-        #labels_out = cc3d.connected_components(val_outputs, connectivity=connectivity)
 
         saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
