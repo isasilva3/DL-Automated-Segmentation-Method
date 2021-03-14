@@ -358,6 +358,7 @@ with torch.no_grad():
 
         size = ndimage.sum(val_outputs_1)
         print("The size is:", size)
+        print("The val_output is:", val_outputs_1)
 
 
         #volume = skimage.measure.label(val_outputs_1, background=None, return_num=False, connectivity=None)
