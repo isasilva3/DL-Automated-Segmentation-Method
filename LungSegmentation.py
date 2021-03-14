@@ -223,7 +223,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 5
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -312,13 +312,6 @@ plt.xlabel("epoch")
 plt.plot(x, y)
 plt.show()
 fig2.savefig('Lungs_Plot.png')
-
-
-def getLargestCC(segmentation):
-    labels = label(segmentation)
-    assert( labels.max() != 0 ) # assume at least 1 CC
-    largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
-    return largestCC
 
 
 """## Check best model output with the input image and label"""
