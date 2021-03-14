@@ -205,8 +205,8 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#device = torch.device('cpu')
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
