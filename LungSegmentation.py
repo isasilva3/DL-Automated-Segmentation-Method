@@ -355,13 +355,16 @@ with torch.no_grad():
         #else:
             #both_lungs = largest(val_outputs)
 
+        volume = skimage.measure.label(val_outputs_1, background=None, return_num=False, connectivity=None)
+        print("The measure is:", volume)
 
         saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
-path = "//home//imoreira//Segmentations"
-for i in path:
-    volume = skimage.measure.label(i)
-    print("The measure is:", volume)
+
+#path = "//home//imoreira//Segmentations"
+#for i in path:
+#    volume = skimage.measure.label(i)
+#    print("The measure is:", volume)
 
 
 
