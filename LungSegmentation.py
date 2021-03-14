@@ -22,6 +22,7 @@ Source: Catarina
 
 """
 import numpy
+import skimage
 from skimage.viewer.plugins import measure
 
 """## Setup imports"""
@@ -205,8 +206,8 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
@@ -342,7 +343,7 @@ with torch.no_grad():
             val_images, roi_size, sw_batch_size, model
         )
 
-        val_outputs_1 = val_outputs_1.cpu().argmax(dim=1, keepdim=True)
+        val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
         val_outputs_2 = val_outputs_2.argmax(dim=1, keepdim=True)
 
         #if largest(val_outputs) >= 2000
@@ -354,7 +355,7 @@ with torch.no_grad():
         #else:
             #both_lungs = largest(val_outputs)
 
-        volume = measure.label(val_outputs_1)
+        volume = skimage.measure.label(val_outputs_1)
         print("The measure is:", volume)
 
 
