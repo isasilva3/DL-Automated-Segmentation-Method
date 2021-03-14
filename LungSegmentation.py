@@ -342,7 +342,7 @@ with torch.no_grad():
             val_images, roi_size, sw_batch_size, model
         )
 
-        val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
+        val_outputs_1 = val_outputs_1.cpu().argmax(dim=1, keepdim=True)
         val_outputs_2 = val_outputs_2.argmax(dim=1, keepdim=True)
 
         #if largest(val_outputs) >= 2000
