@@ -223,7 +223,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 100
+epoch_num = 10
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -340,30 +340,25 @@ with torch.no_grad():
         val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
         val_outputs_2 = val_outputs_2.argmax(dim=1, keepdim=True)
 
-        #if largest(val_outputs) >= 2000
+
         first_lung = largest(val_outputs_1)
         second_lung = largest(val_outputs_2 - first_lung)
         #second_largest = largest(second_lung)
-        both_lungs = first_lung + second_lung
         #val_outputs = both_lungs
         #else:
             #both_lungs = largest(val_outputs)
 
-        size = ndimage.sum(val_outputs_1)
-        print("The size is:", size)
-        print("The val_output is:", val_outputs_1)
+        #size = ndimage.sum(val_outputs_1)
+        a = (ndimage(first_lung)[1]) * 0.30
 
+        if ndimage.sum(second_lung)[1] < a :
+            both_lungs = largest(val_outputs_1)
+        else:
+            both_lungs = first_lung + second_lung
 
-        #volume = skimage.measure.label(val_outputs_1, background=None, return_num=False, connectivity=None)
-        #print("The measure is:", volume)
+        #print("The size is:", size)
 
         saver.save_batch(both_lungs, val_data["image_meta_dict"])
-
-
-#path = "//home//imoreira//Segmentations"
-#for i in path:
-#    volume = skimage.measure.label(i)
-#    print("The measure is:", volume)
 
 
 
