@@ -23,6 +23,7 @@ Source: Catarina
 """
 import numpy
 import skimage
+from scipy import ndimage
 from skimage.viewer.plugins import measure
 
 """## Setup imports"""
@@ -355,8 +356,12 @@ with torch.no_grad():
         #else:
             #both_lungs = largest(val_outputs)
 
-        volume = skimage.measure.label(val_outputs_1, background=None, return_num=False, connectivity=None)
-        print("The measure is:", volume)
+        size = ndimage.sum(val_outputs_1)
+        print("The size is:", size)
+
+
+        #volume = skimage.measure.label(val_outputs_1, background=None, return_num=False, connectivity=None)
+        #print("The measure is:", volume)
 
         saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
