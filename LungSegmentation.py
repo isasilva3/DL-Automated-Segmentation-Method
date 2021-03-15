@@ -348,16 +348,17 @@ with torch.no_grad():
         #else:
             #both_lungs = largest(val_outputs)
 
-        #size = ndimage.sum(val_outputs_1)
+        size = ndimage.sum(second_lung)
+        print("The size is:", size)
         #b = int(ndimage(first_lung)[1])
         #a = 0.30* b
 
-        if ndimage.sum(second_lung) < 2000:
-            both_lungs = largest(val_outputs_1)
-        else:
+        if ndimage.sum(second_lung) > 2000:
             both_lungs = first_lung + second_lung
+        else:
+            both_lungs = largest(val_outputs_1)
 
-        #print("The size is:", size)
+
 
         saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
