@@ -349,10 +349,10 @@ with torch.no_grad():
             #both_lungs = largest(val_outputs)
 
         #size = ndimage.sum(val_outputs_1)
-        b = int(ndimage(first_lung)[1])
-        a = 0.30* b
+        #b = int(ndimage(first_lung)[1])
+        #a = 0.30* b
 
-        if ndimage.sum(second_lung) < a :
+        if ndimage.sum(second_lung) < 2000:
             both_lungs = largest(val_outputs_1)
         else:
             both_lungs = first_lung + second_lung
