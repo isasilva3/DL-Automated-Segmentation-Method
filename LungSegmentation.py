@@ -350,16 +350,18 @@ with torch.no_grad():
         #else:
             #both_lungs = largest(val_outputs)
 
-        c = largest(val_outputs_1)
-        d = largest(val_outputs_2 - first_lung)
+        #c = largest(val_outputs_1)
+        #d = largest(val_outputs_2 - first_lung)
 
-        e = ndimage.sum(d)
-        f = ndimage.sum(c)
+        #e = ndimage.sum(d)
+        #f = ndimage.sum(c)
 
         #size = ndimage.sum(second_lung)
         #print("The size is:", size)
 
-        if e >= f*0.10:
+        g = ndimage.sum(first_lung) * 0.10
+
+        if ndimage.sum(second_lung) >= g :
             both_lungs = first_lung + second_lung
         else:
             both_lungs = largest(val_outputs_1)
