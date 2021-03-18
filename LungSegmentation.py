@@ -223,7 +223,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 100
+epoch_num = 10
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -340,6 +340,10 @@ with torch.no_grad():
         val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
         val_outputs_2 = val_outputs_2.argmax(dim=1, keepdim=True)
 
+        val_outputs_1 = val_outputs_1.cpu().detach().numpy()
+        val_outputs_2 = val_outputs_2.cpu().detach().numpy()
+
+
 
         first_lung = largest(val_outputs_1)
         second_lung = largest(val_outputs_2 - first_lung)
@@ -348,12 +352,12 @@ with torch.no_grad():
         #else:
             #both_lungs = largest(val_outputs)
 
-        size = ndimage.sum(second_lung)
-        print("The size is:", size)
-        #b = int(ndimage(first_lung)[1])
-        #a = 0.30* b
+        a = ndimage.sum(first_lung) * 0.10
 
-        if ndimage.sum(second_lung) >= 2000:
+        #size = ndimage.sum(second_lung)
+        #print("The size is:", size)
+
+        if ndimage.sum(second_lung) >= a:
             both_lungs = first_lung + second_lung
         else:
             both_lungs = largest(val_outputs_1)
