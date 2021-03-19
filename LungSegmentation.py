@@ -223,7 +223,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 10
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -359,7 +359,7 @@ with torch.no_grad():
         #size = ndimage.sum(second_lung)
         #print("The size is:", size)
 
-        g = ndimage.sum(first_lung) * 0.10
+        g = ndimage.sum(first_lung) * 0.5
 
         if ndimage.sum(second_lung) >= g :
             both_lungs = first_lung + second_lung
