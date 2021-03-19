@@ -340,8 +340,8 @@ with torch.no_grad():
         val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
         val_outputs_2 = val_outputs_2.argmax(dim=1, keepdim=True)
 
-        a = val_outputs_1.cpu().detach().numpy()
-        b = val_outputs_2.cpu().detach().numpy()
+        #a = val_outputs_1.cpu().detach().numpy()
+        #b = val_outputs_2.cpu().detach().numpy()
 
         first_lung = largest(val_outputs_1)
         second_lung = largest(val_outputs_2 - first_lung)
@@ -359,7 +359,7 @@ with torch.no_grad():
         #size = ndimage.sum(second_lung)
         #print("The size is:", size)
 
-        g = ndimage.sum(first_lung) * 0.5
+        g = ndimage.sum(first_lung) * 0.10
 
         if ndimage.sum(second_lung) >= g :
             both_lungs = first_lung + second_lung
