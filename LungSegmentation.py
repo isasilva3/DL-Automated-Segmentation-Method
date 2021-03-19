@@ -95,6 +95,8 @@ out_dir = os.path.join(root_dir, "Output")
 
 """## Set MSD Spleen dataset path"""
 
+
+test_images = sorted(glob.glob(os.path.join(data_dir, "imagesTs", "*.nii.gz")))
 train_images = sorted(glob.glob(os.path.join(data_dir, "imagesTr", "*.nii.gz")))
 train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
 data_dicts = [
@@ -204,6 +206,10 @@ val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, 
 # val_ds = Dataset(data=val_files, transform=val_transforms)
 val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
+test_ds = CacheDataset(data=test_images, transform=val_transforms, cache_rate=1.0, num_workers=0)
+# val_ds = Dataset(data=val_files, transform=val_transforms)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
+
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
@@ -223,7 +229,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 100
+epoch_num = 30
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -261,10 +267,10 @@ for epoch in range(epoch_num):
         with torch.no_grad():
             metric_sum = 0.0
             metric_count = 0
-            for val_data in val_loader:
+            for test_data in test_loader:
                 val_inputs, val_labels = (
-                    val_data["image"].to(device),
-                    val_data["label"].to(device),
+                    test_data["image"].to(device),
+                    test_data["label"].to(device),
                 )
                 roi_size = (160, 160, 160)
                 sw_batch_size = 4
@@ -325,16 +331,16 @@ model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
-    for i, val_data in enumerate(val_loader):
-        val_images = val_data["image"].to(device)
+    for i, test_data in enumerate(val_loader):
+        val_images = test_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
-            val_images, roi_size, sw_batch_size, model
+            test_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_2 = sliding_window_inference(
-            val_images, roi_size, sw_batch_size, model
+            test_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
@@ -368,7 +374,7 @@ with torch.no_grad():
 
 
 
-        saver.save_batch(both_lungs, val_data["image_meta_dict"])
+        saver.save_batch(both_lungs, test_data["image_meta_dict"])
 
 
 
