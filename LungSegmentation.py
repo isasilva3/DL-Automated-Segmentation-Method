@@ -166,19 +166,6 @@ val_transforms = Compose(
         ToTensord(keys=["image", "label"]),
     ]
 )
-test_transforms = Compose(
-    [
-        LoadImaged(keys=["image"]),
-        AddChanneld(keys=["image"]),
-        Spacingd(keys=["image"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-        Orientationd(keys=["image"], axcodes="RAS"),
-        ScaleIntensityRanged(
-            keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
-        ),
-        #CropForegroundd(keys=["image", "label"], source_key="image"),
-        ToTensord(keys=["image"]),
-    ]
-)
 
 """## Check transforms in DataLoader"""
 
@@ -219,7 +206,7 @@ val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, 
 # val_ds = Dataset(data=val_files, transform=val_transforms)
 val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
-test_ds = CacheDataset(data=test_images, transform=test_transforms, cache_rate=1.0, num_workers=0)
+test_ds = CacheDataset(data=test_images, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
 test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
 
