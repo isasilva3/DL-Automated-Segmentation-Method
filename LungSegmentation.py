@@ -347,7 +347,7 @@ with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
     for i, test_data in enumerate(test_loader):
-        test_images = test_data["image"].to(device)
+        test_images = test_dicts["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
@@ -389,7 +389,7 @@ with torch.no_grad():
 
 
 
-        saver.save_batch(both_lungs, test_data["image_meta_dict"])
+        saver.save_batch(both_lungs, test_images["image_meta_dict"])
 
 
 
