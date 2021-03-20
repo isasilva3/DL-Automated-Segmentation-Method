@@ -170,15 +170,15 @@ val_transforms = Compose(
 )
 val_transforms = Compose(
     [
-        LoadImaged(keys=["image"]),
-        AddChanneld(keys=["image"]),
-        Spacingd(keys=["image"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-        Orientationd(keys=["image"], axcodes="RAS"),
+        LoadImaged(keys=["image", "label"]),
+        AddChanneld(keys=["image", "label"]),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
             keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
-        ToTensord(keys=["image"]),
+        ToTensord(keys=["image", "label"]),
     ]
 )
 
@@ -282,10 +282,10 @@ for epoch in range(epoch_num):
         with torch.no_grad():
             metric_sum = 0.0
             metric_count = 0
-            for test_data in test_loader:
+            for val_data in val_loader:
                 val_inputs, val_labels = (
-                    test_data["image"].to(device),
-                    test_data["label"].to(device),
+                    val_data["image"].to(device),
+                    val_data["label"].to(device),
                 )
                 roi_size = (160, 160, 160)
                 sw_batch_size = 4
@@ -346,8 +346,8 @@ model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
-    for i, test_data in enumerate(val_loader):
-        val_images = test_data["image"].to(device)
+    for i, test_data in enumerate(test_loader):
+        test_images = test_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
