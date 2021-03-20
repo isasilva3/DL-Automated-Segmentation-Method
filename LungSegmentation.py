@@ -168,6 +168,19 @@ val_transforms = Compose(
         ToTensord(keys=["image", "label"]),
     ]
 )
+val_transforms = Compose(
+    [
+        LoadImaged(keys=["image"]),
+        AddChanneld(keys=["image"]),
+        Spacingd(keys=["image"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image"], axcodes="RAS"),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
+        ),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
+        ToTensord(keys=["image"]),
+    ]
+)
 
 """## Check transforms in DataLoader"""
 
