@@ -107,7 +107,7 @@ test_dicts = [{"image": image_name} for image_name in zip(test_images)]
 
 n = len(data_dicts)
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
-train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[int(n*0.2):]
+train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[:int(n*0.2)]
 
 
 """## Set deterministic training for reproducibility"""
@@ -346,16 +346,16 @@ model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
-    for i, test_data in enumerate(test_loader):
-        test_images = test_data.to(device)
+    for i, val_data in enumerate(test_loader):
+        val_images = val_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model
+            val_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_2 = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model
+            val_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
@@ -389,7 +389,7 @@ with torch.no_grad():
 
 
 
-        saver.save_batch(both_lungs, test_images["image_meta_dict"])
+        saver.save_batch(both_lungs, val_images["image_meta_dict"])
 
 
 
