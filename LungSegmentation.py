@@ -206,9 +206,9 @@ val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, 
 # val_ds = Dataset(data=val_files, transform=val_transforms)
 val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
-test_ds = CacheDataset(data=test_images, cache_rate=1.0, num_workers=0)
+#test_ds = CacheDataset(data=test_images, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
+test_loader = DataLoader(test_images, batch_size=1, num_workers=0)
 
 """## Create Model, Loss, Optimizer"""
 
