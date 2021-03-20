@@ -103,6 +103,8 @@ data_dicts = [
     {"image": image_name, "label": label_name}
     for image_name, label_name in zip(train_images, train_labels)
 ]
+test_dicts = [{"image": image_name} for image_name in zip(test_images)]
+
 n = len(data_dicts)
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
 train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[int(n*0.2):]
