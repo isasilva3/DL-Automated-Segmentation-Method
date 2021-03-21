@@ -350,7 +350,7 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
-    saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
+    saver = NiftiSaver(output_dir='//home//imoreira//Segmentations', output_postfix="seg", output_ext=".nii.gz")
     for i, val_data in enumerate(val_loader):
         val_images = val_data["image"].to(device)
 
