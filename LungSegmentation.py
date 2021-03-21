@@ -284,10 +284,10 @@ for epoch in range(epoch_num):
         with torch.no_grad():
             metric_sum = 0.0
             metric_count = 0
-            for val_data in val_loader:
+            for test_data in test_loader:
                 val_inputs, val_labels = (
-                    val_data["image"].to(device),
-                    val_data["label"].to(device),
+                    test_data["image"].to(device),
+                    test_data["label"].to(device),
                 )
                 roi_size = (160, 160, 160)
                 sw_batch_size = 4
