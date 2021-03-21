@@ -110,7 +110,7 @@ n = len(data_dicts)
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
 train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[:int(n*0.2)]
 
-test_files = test_dicts["image"]
+test_files = test_dicts
 
 
 """## Set deterministic training for reproducibility"""
