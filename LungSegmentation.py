@@ -96,14 +96,14 @@ out_dir = os.path.join(root_dir, "Output")
 """## Set MSD Spleen dataset path"""
 
 
-#test_images = sorted(glob.glob(os.path.join(data_dir, "imagesTs", "*.nii.gz")))
+test_images = sorted(glob.glob(os.path.join(data_dir, "imagesTs", "*.nii.gz")))
 train_images = sorted(glob.glob(os.path.join(data_dir, "imagesTr", "*.nii.gz")))
 train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
 data_dicts = [
     {"image": image_name, "label": label_name}
     for image_name, label_name in zip(train_images, train_labels)
 ]
-#test_dicts = [{"image": image_name} for image_name in zip(test_images)]
+test_dicts = [{"image": image_name} for image_name in zip(test_images)]
 
 n = len(data_dicts)
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
@@ -225,7 +225,7 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
 #test_ds = CacheDataset(data=test_images, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-#test_loader = DataLoader(test_images, batch_size=1, num_workers=0)
+test_loader = DataLoader(test_images, batch_size=1, num_workers=0)
 
 """## Create Model, Loss, Optimizer"""
 
@@ -348,16 +348,16 @@ model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
-    for i, val_data in enumerate(val_loader):
-        val_images = val_data["image"].to(device)
+    for i, test_data in enumerate(test_loader):
+        test_img = test_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
-            val_images, roi_size, sw_batch_size, model
+            test_img, roi_size, sw_batch_size, model
         )
 
         val_outputs_2 = sliding_window_inference(
-            val_images, roi_size, sw_batch_size, model
+            test_img, roi_size, sw_batch_size, model
         )
 
         val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
@@ -391,7 +391,7 @@ with torch.no_grad():
 
 
 
-        saver.save_batch(both_lungs, val_data["image_meta_dict"])
+        saver.save_batch(both_lungs, test_data["image_meta_dict"])
 
 
 
