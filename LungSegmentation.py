@@ -353,7 +353,7 @@ with torch.no_grad():
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
     for test_data in test_loader:
         test_inputs = (
-            test_data["image"].to(device)
+            test_data["image"]
         )
         #test_images = test_ds["image"].to(device)
         roi_size = (160, 160, 160)
