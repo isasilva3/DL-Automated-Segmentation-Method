@@ -249,7 +249,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 20
+epoch_num = 15
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -351,8 +351,8 @@ model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations')
-    for i, test_data in enumerate(test_loader):
-        test_images = test_data["image"]
+    for i, test_ds in enumerate(test_loader):
+        test_images = test_ds.to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
