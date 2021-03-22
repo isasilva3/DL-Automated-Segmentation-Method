@@ -91,9 +91,11 @@ data_dicts = [
     {"image": image_name, "label": label_name}
     for image_name, label_name in zip(train_images, train_labels)
 ]
-n = len(data_dicts)
+#n = len(data_dicts)
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
-train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[int(n*0.2):]
+#train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[int(n*0.2):]
+
+val_files, train_files, test_files = data_dicts[0:8], data_dicts[8:40], data_dicts[40:50]
 
 
 """## Set deterministic training for reproducibility"""
@@ -154,6 +156,19 @@ val_transforms = Compose(
         ToTensord(keys=["image", "label"]),
     ]
 )
+test_transforms = Compose(
+    [
+        LoadImaged(keys=["image", "label"]),
+        AddChanneld(keys=["image", "label"]),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
+        ),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
+        ToTensord(keys=["image", "label"]),
+    ]
+)
 
 """## Check transforms in DataLoader"""
 
@@ -194,6 +209,11 @@ val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, 
 # val_ds = Dataset(data=val_files, transform=val_transforms)
 val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
+#test_ds = Dataset(data=test_files)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
+
+
 """## Create Model, Loss, Optimizer"""
 
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
@@ -213,7 +233,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -310,14 +330,14 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Bladder_Segs_Out')
-    for i, val_data in enumerate(val_loader):
-        val_images = val_data["image"].to(device)
+    saver = NiftiSaver(output_dir='//home//imoreira//Bladder_Segs_Out', output_postfix="seg", output_ext=".nii.gz")
+    for i, test_data in enumerate(test_loader):
+        test_images = test_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs = sliding_window_inference(
-            val_images, roi_size, sw_batch_size, model
+            test_images, roi_size, sw_batch_size, model
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         val_outputs = largest(val_outputs)
-        saver.save_batch(val_outputs, val_data["image_meta_dict"])
+        saver.save_batch(val_outputs, test_data["image_meta_dict"])
