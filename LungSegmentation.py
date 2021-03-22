@@ -96,7 +96,7 @@ out_dir = os.path.join(root_dir, "Output")
 """## Set MSD Spleen dataset path"""
 
 
-test_images = sorted(glob.glob(os.path.join(data_dir, "imagesTs", "*.nii.gz")))
+#test_images = sorted(glob.glob(os.path.join(data_dir, "imagesTs", "*.nii.gz")))
 train_images = sorted(glob.glob(os.path.join(data_dir, "imagesTr", "*.nii.gz")))
 train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
 data_dicts = [
@@ -104,13 +104,13 @@ data_dicts = [
     for image_name, label_name in zip(train_images, train_labels)
 ]
 
-test_dicts = [{"image": image_name} for image_name in zip(test_images)]
-
-n = len(data_dicts)
+#n = len(data_dicts)
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
-train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[:int(n*0.2)]
+#train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[:int(n*0.2)]
 
-test_files = test_dicts
+train_files, val_files, test_files = data_dicts[0:7], data_dicts[8:33], data_dicts[34:43]
+
+#test_files = test_dicts
 
 
 """## Set deterministic training for reproducibility"""
@@ -171,7 +171,7 @@ val_transforms = Compose(
         ToTensord(keys=["image", "label"]),
     ]
 )
-'''
+
 test_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
@@ -185,7 +185,7 @@ test_transforms = Compose(
         ToTensord(keys=["image", "label"]),
     ]
 )
-'''
+
 
 """## Check transforms in DataLoader"""
 
@@ -226,8 +226,8 @@ val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, 
 # val_ds = Dataset(data=val_files, transform=val_transforms)
 val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
-#test_ds = CacheDataset(data=test_images, cache_rate=1.0, num_workers=0)
-test_ds = Dataset(data=test_files)
+test_ds = CacheDataset(data=test_files, cache_rate=1.0, num_workers=0)
+#test_ds = Dataset(data=test_files)
 test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
 
 """## Create Model, Loss, Optimizer"""
