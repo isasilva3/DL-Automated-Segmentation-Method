@@ -226,7 +226,7 @@ val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, 
 # val_ds = Dataset(data=val_files, transform=val_transforms)
 val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
-test_ds = CacheDataset(data=test_files, cache_rate=1.0, num_workers=0)
+test_ds = CacheDataset(data=test_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
 test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
 
