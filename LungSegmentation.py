@@ -226,7 +226,7 @@ val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, 
 # val_ds = Dataset(data=val_files, transform=val_transforms)
 val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
-test_ds = CacheDataset(data=test_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
 test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
 
@@ -348,6 +348,7 @@ out_dir = "//home//imoreira//Data//Output"
 #out_dir = "C:\\Users\\isasi\\Downloads\\Output"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
+
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations', output_postfix="seg", output_ext=".nii.gz")
