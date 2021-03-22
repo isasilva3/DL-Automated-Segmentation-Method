@@ -108,7 +108,7 @@ data_dicts = [
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
 #train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[:int(n*0.2)]
 
-train_files, val_files, test_files = data_dicts[1:8], data_dicts[9:43], data_dicts[44:58]
+val_files, train_files, test_files = data_dicts[0:8], data_dicts[8:40], data_dicts[40:50]
 
 #test_files = test_dicts
 
