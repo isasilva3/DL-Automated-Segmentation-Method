@@ -110,6 +110,13 @@ data_dicts = [
 
 val_files, train_files, test_files = data_dicts[0:8], data_dicts[8:40], data_dicts[40:50]
 
+print("validation files", val_files)
+print("train files", train_files)
+print("test files", test_files)
+
+#5 fold cross validation
+#0:32 training and 33:40 validation split the data diferently and compare the results
+
 #test_files = test_dicts
 
 
@@ -171,6 +178,7 @@ val_transforms = Compose(
         ToTensord(keys=["image", "label"]),
     ]
 )
+#try without the scale intensity
 
 test_transforms = Compose(
     [
@@ -178,9 +186,9 @@ test_transforms = Compose(
         AddChanneld(keys=["image", "label"]),
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
-        ScaleIntensityRanged(
-            keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
-        ),
+        #ScaleIntensityRanged(
+        #    keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
+        #),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
     ]
