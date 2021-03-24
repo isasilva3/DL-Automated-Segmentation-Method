@@ -162,9 +162,9 @@ test_transforms = Compose(
         AddChanneld(keys=["image", "label"]),
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
-        #ScaleIntensityRanged(
-        #    keys=["image"], a_min=-160, a_max=60, b_min=0.0, b_max=1.0, clip=True,
-        #),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-160, a_max=60, b_min=0.0, b_max=1.0, clip=True,
+        ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
     ]
