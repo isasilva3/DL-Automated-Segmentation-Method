@@ -21,7 +21,7 @@ Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
 
 """
-from MONAI.monai.utils import GridSampleMode, GridSamplePadMode
+
 
 """## Setup imports"""
 
@@ -38,7 +38,7 @@ import torch
 from monai.apps import download_and_extract
 from monai.config import print_config
 from monai.data import CacheDataset, DataLoader, Dataset
-from monai.utils import set_determinism
+from monai.utils import set_determinism, GridSampleMode, GridSamplePadMode
 from monai.networks.nets import SegResNet
 from monai.data.nifti_saver import NiftiSaver
 from monai.inferers import sliding_window_inference
@@ -339,9 +339,9 @@ with torch.no_grad():
                        mode=GridSampleMode.BILINEAR,
                        padding_mode=GridSamplePadMode.BORDER,
                        align_corners=False,
-                       DtypeLike=np.float64,
-                       Output_dtype=np.float32,
-                       sueeze_end_dims=True
+                       dtype=np.float64,
+                       output_dtype=np.float32,
+                       squeeze_end_dims=True
                        )
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
