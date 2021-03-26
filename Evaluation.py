@@ -1,5 +1,7 @@
 
 import seg_metrics.seg_metrics as sg
+import SimpleITK as sitk
+
 
 labels_dir = "//home//imoreira//Segmentations"
 
