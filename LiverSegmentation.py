@@ -340,8 +340,7 @@ with torch.no_grad():
                        padding_mode=GridSamplePadMode.BORDER,
                        align_corners=False,
                        dtype=np.float64,
-                       output_dtype=np.float32,
-                       squeeze_end_dims=True
+                       output_dtype=np.float32
                        )
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
