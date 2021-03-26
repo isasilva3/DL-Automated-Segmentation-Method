@@ -21,6 +21,7 @@ Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
 
 """
+from MONAI.monai.utils import GridSampleMode, GridSamplePadMode
 
 """## Setup imports"""
 
@@ -233,7 +234,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 10
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -331,7 +332,17 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Liver_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Liver_Segs_Out', output_postfix="seg", output_ext=".nii.gz")
+    saver = NiftiSaver(output_dir='//home//imoreira//Liver_Segs_Out',
+                       output_postfix="seg_liver",
+                       output_ext=".nii.gz",
+                       resample=True,
+                       mode=GridSampleMode.BILINEAR,
+                       padding_mode=GridSamplePadMode.BORDER,
+                       align_corners=False,
+                       DtypeLike=np.float64,
+                       Output_dtype=np.float32,
+                       sueeze_end_dims=True
+                       )
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (160, 160, 160)

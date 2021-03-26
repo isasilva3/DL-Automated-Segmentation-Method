@@ -26,6 +26,8 @@ import skimage
 from scipy import ndimage
 from skimage.viewer.plugins import measure
 
+from MONAI.monai.utils import GridSampleMode, GridSamplePadMode
+
 """## Setup imports"""
 
 import glob
@@ -359,16 +361,19 @@ model.eval()
 
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
-    saver = NiftiSaver(output_dir='//home//imoreira//Segmentations', output_postfix="seg", output_ext=".nii.gz")
+    saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
+                       output_postfix="seg_lungs",
+                       output_ext=".nii.gz",
+                       resample=True,
+                       mode=GridSampleMode.BILINEAR,
+                       padding_mode=GridSamplePadMode.BORDER,
+                       align_corners=False,
+                       DtypeLike=np.float64,
+                       Output_dtype=np.float32,
+                       sueeze_end_dims=True
+                       )
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
-
-    #for test_data in test_loader:
-    #    test_inputs = (
-    #        test_data["image"].to(device)
-    #    )
-        #test_images = test_ds["image"].to(device)
-
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
