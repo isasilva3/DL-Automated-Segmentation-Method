@@ -335,12 +335,12 @@ with torch.no_grad():
     saver = NiftiSaver(output_dir='//home//imoreira//Liver_Segs_Out',
                        output_postfix="seg_liver",
                        output_ext=".nii.gz",
-                       resample=True,
+                       #resample=True,
                        mode=GridSampleMode.BILINEAR,
                        padding_mode=GridSamplePadMode.BORDER,
-                       align_corners=False,
-                       dtype=np.float64,
-                       output_dtype=np.float32
+                       #align_corners=False,
+                       #dtype=np.float64,
+                       #output_dtype=np.float32
                        )
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
