@@ -1,4 +1,3 @@
-
 import seg_metrics.seg_metrics as sg
 import SimpleITK as sitk
 
@@ -14,10 +13,9 @@ pred_path = '/home/imoreira/Metrics/Pred'
 
 csv_file = 'Metrics.csv'
 
-labels = [0, 4, 5 ,6 ,7 , 8]
+#labels = [0, 4, 5 ,6 ,7 , 8]
 
-metrics = sg.write_metrics(labels=labels[1:],  # exclude background
-                  gdth_path=gdth_path,
+metrics = sg.write_metrics(gdth_path=gdth_path,
                   pred_path=pred_path,
                   csv_file=csv_file)
 
