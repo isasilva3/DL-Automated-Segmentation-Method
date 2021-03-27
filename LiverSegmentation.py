@@ -234,7 +234,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 10
+epoch_num = 300
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -336,8 +336,8 @@ with torch.no_grad():
                        output_postfix="seg_liver",
                        output_ext=".nii.gz",
                        #resample=True,
-                       mode=GridSampleMode.BILINEAR,
-                       padding_mode=GridSamplePadMode.BORDER,
+                       #mode=constant,
+                       #padding_mode=GridSamplePadMode.BORDER,
                        #align_corners=False,
                        #dtype=np.float64,
                        #output_dtype=np.float32
