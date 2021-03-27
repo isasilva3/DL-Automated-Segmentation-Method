@@ -10,7 +10,7 @@ labels_dicts = [{"image": image_name} for image_name in zip(labels_dir)]
 
 gdth_path = '//home//imoreira//Data//Lungs//labelsTr'
 
-pred_path = '//home//imoreira'
+pred_path = "//home//imoreira//Segmentations"
 
 csv_file = 'Metrics.csv'
 
