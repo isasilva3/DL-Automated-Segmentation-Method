@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import glob
 import sys
 from myutil.myutil import load_itk, get_gdth_pred_names, one_hot_encode_3d
+import seg_metrics.seg_metrics as sg
 
 
 # %%
@@ -253,7 +254,6 @@ def write_metrics(labels, gdth_path, pred_path, csv_file, metrics=None):
 def main():
     labels=[0,4,5,6,7,8]
 
-    sg = '/home/imoreira/Metrics/Pred'
     metrics = sg.write_metrics(labels=labels[1:],
                                 gdth_path='/home/imoreira/Metrics/Labels',
                                 pred_path='/home/imoreira/Metrics/Pred',
