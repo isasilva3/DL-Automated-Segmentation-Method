@@ -27,16 +27,12 @@ pred_path='/home/imoreira/Metrics/Pred'
 
 labels = [0, 4, 5, 6, 7, 8]
 
-data_dicts = [
-    {"label": label_name, "seg": seg_name}
-    for label_name, seg_name in zip(gdth_path, pred_path)
-]
 
 metrics = sg.write_metrics(labels=labels[1:],
                            gdth_path=gdth_path,
                            pred_path=pred_path,
-                           csv_file='Metrics.csv',
-                           metrics=['dice', 'hd'])
+                           csv_file='Metrics.csv')
 
-metrics_dict_all_labels = sg.get_metrics_dict_all_labels(labels, gdth_path, pred_path, spacing=gdth_spacing[::-1],
-                                                         metrics_type=metrics)
+print(metrics)
+
+
