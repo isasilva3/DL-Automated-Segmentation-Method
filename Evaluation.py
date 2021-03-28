@@ -1,12 +1,3 @@
-'''
-
-import seg_metrics.seg_metrics as sg
-import SimpleITK as sitk
-
-#labels_dir = '/home/imoreira/Segmentations/Pred'
-
-#labels_dicts = [{"image": image_name} for image_name in zip(labels_dir)]
-'''
 import metrics as metrics
 import numpy as np
 import os
@@ -20,19 +11,30 @@ import glob
 import sys
 from myutil.myutil import load_itk, get_gdth_pred_names, one_hot_encode_3d
 import seg_metrics.seg_metrics as sg
+import nibabel as nib
+import spicy
+from scipy.spatial.distance import directed_hausdorff
+
+#metrics = sg.write_metrics(labels=labels[1:],
+#                           gdth_path=gdth_path,
+#                           pred_path=pred_path,
+#                           csv_file='Metrics.csv')
+
+#print(metrics)
+
+gdth_path=nib.load('/home/imoreira/Metrics/Labels')
+pred_path=nib.load('/home/imoreira/Metrics/Pred')
+
+gdth_data = gdth_path.get_fdata()
+pred_data = pred_path.get_fdata()
+
+dgth_data_arr = np.asarray(gdth_data)
+pred_data_arr = np.asarray(pred_data)
+
+hf = directed_hausdorff(dgth_data_arr, pred_data_arr)
+
+print(hf)
 
 
-gdth_path='/home/imoreira/Metrics/Labels'
-pred_path='/home/imoreira/Metrics/Pred'
-
-labels = [0, 4, 5, 6, 7, 8]
-
-
-metrics = sg.write_metrics(labels=labels[1:],
-                           gdth_path=gdth_path,
-                           pred_path=pred_path,
-                           csv_file='Metrics.csv')
-
-print(metrics)
 
 
