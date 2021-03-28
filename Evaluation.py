@@ -7,16 +7,15 @@ import SimpleITK as sitk
 
 
 
-gdth_path = '/home/imoreira/Metrics/Labels'
 
-pred_path = '/home/imoreira/Metrics/Pred'
 
-csv_file = 'Metrics.csv'
+labels=[0,4,5,6,7,8]
 
-#labels = [0, 4, 5 ,6 ,7 , 8]
+metrics = sg.write_metrics(labels=labels[1:],
+                            gdth_path='/home/imoreira/Metrics/Labels',
+                            pred_path='/home/imoreira/Metrics/Pred',
+                            csv_file='Metrics.csv',
+                            metrics=['dice', 'hd'])
 
-metrics = sg.write_metrics(gdth_path=gdth_path,
-                  pred_path=pred_path,
-                  csv_file=csv_file)
 
 print(metrics)
