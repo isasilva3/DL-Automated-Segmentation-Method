@@ -22,8 +22,8 @@ from scipy.spatial.distance import directed_hausdorff
 
 #print(metrics)
 
-gdth_path=nib.load('/home/imoreira/Metrics/Labels')
-pred_path=nib.load('/home/imoreira/Metrics/Pred')
+gdth_path=nib.load('/home/imoreira/Metrics/Labels/CNS044_lungs.nii')
+pred_path=nib.load('/home/imoreira/Metrics/Pred/CNS044_lungs.nii')
 
 gdth_data = gdth_path.get_fdata()
 pred_data = pred_path.get_fdata()
@@ -31,9 +31,9 @@ pred_data = pred_path.get_fdata()
 dgth_data_arr = np.asarray(gdth_data)
 pred_data_arr = np.asarray(pred_data)
 
-hf = directed_hausdorff(dgth_data_arr, pred_data_arr)
+hd = directed_hausdorff(dgth_data_arr, pred_data_arr)
 
-print(hf)
+print(hd)
 
 
 
