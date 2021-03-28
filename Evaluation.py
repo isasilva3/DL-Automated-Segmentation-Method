@@ -36,3 +36,6 @@ metrics = sg.write_metrics(labels=data_dicts[1:],
                            pred_path=pred_path,
                            csv_file='Metrics.csv',
                            metrics=['dice', 'hd'])
+
+dice = metrics['dice']
+hd95 = metrics['hd95']
