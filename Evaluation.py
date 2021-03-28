@@ -252,6 +252,9 @@ def write_metrics(labels, gdth_path, pred_path, csv_file, metrics=None):
 
 
 def main():
+
+    metrics_dict_all_labels=[]
+
     labels=[0,4,5,6,7,8]
 
     metrics = sg.write_metrics(labels=labels[1:],
