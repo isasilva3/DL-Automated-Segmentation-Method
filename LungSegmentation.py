@@ -258,7 +258,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 10
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -363,14 +363,8 @@ with torch.no_grad():
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
                        output_postfix="seg_lungs",
                        output_ext=".nii.gz",
-                       resample=True,
-                       mode=GridSampleMode.BILINEAR,
-                       padding_mode=GridSamplePadMode.BORDER,
-                       align_corners=False,
-                       dtype = np.float64,
-                       output_dtype = np.float32,
-                       squeeze_end_dims = True
-
+                       dtype=bool,
+                       output_dtype=bool
                        )
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
@@ -410,8 +404,12 @@ with torch.no_grad():
 
         if ndimage.sum(second_lung) >= g :
             both_lungs = first_lung + second_lung
+            both_lungs = both_lungs.numpy()
+            both_lungs = both_lungs.astype(bool)
         else:
             both_lungs = largest(val_outputs_1)
+            both_lungs = both_lungs.numpy()
+            both_lungs = both_lungs.astype(bool)
 
 
 
