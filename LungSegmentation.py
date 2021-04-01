@@ -43,7 +43,7 @@ import cc3d
 
 from monai.apps import download_and_extract
 from monai.config import print_config
-from monai.data import CacheDataset, DataLoader, Dataset
+from monai.data import CacheDataset, DataLoader, Dataset, write_nifti
 from monai.utils import set_determinism, GridSampleMode, GridSamplePadMode
 from monai.networks.nets import SegResNet
 from monai.data.nifti_saver import NiftiSaver
@@ -362,10 +362,10 @@ with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
                        output_postfix="seg_lungs",
-                       output_ext=".nii.gz",
-                       dtype=np.bool,
-                       output_dtype=np.bool
+                       output_ext=".nii.gz"
                        )
+
+
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (160, 160, 160)
@@ -411,8 +411,7 @@ with torch.no_grad():
             both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(bool)
 
-
-
+        saver = saver.write_nifti(both_lungs, resample=True, dtype=np.bool, output_dtype=np.bool)
         saver.save_batch(both_lungs, test_data["image_meta_dict"])
 
 
