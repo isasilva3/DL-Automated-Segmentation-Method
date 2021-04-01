@@ -362,8 +362,14 @@ with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
                        output_postfix="seg_lungs",
-                       output_ext=".nii.gz"
+                       output_ext=".nii.gz",
+                       resample=True,
+                       #align_corners=True,
+                       dtype=np.bool,
+                       output_dtype=np.bool
                        )
+
+
 
 
     for i, test_data in enumerate(test_loader):
@@ -411,7 +417,7 @@ with torch.no_grad():
             both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(bool)
 
-        saver = saver.write_nifti(both_lungs, resample=True, dtype=np.bool, output_dtype=np.bool)
+
         saver.save_batch(both_lungs, test_data["image_meta_dict"])
 
 
