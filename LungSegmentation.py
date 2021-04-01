@@ -363,6 +363,7 @@ with torch.no_grad():
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
                        output_postfix="seg_lungs",
                        output_ext=".nii.gz",
+                       dtype=np.bool,
                        output_dtype=np.bool
                        )
     for i, test_data in enumerate(test_loader):
