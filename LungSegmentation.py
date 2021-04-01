@@ -362,7 +362,8 @@ with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
                        output_postfix="seg_lungs",
-                       output_ext=".nii.gz"
+                       output_ext=".nii.gz",
+                       output_dtype=np.bool
                        )
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
