@@ -402,13 +402,13 @@ with torch.no_grad():
 
         g = ndimage.sum(first_lung) * 0.10
 
-        if ndimage.sum(second_lung) >= g :
+        if ndimage.sum(second_lung) >= g:
             both_lungs = first_lung + second_lung
-            both_lungs = both_lungs.numpy()
+            both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(bool)
         else:
             both_lungs = largest(val_outputs_1)
-            both_lungs = both_lungs.numpy()
+            both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(bool)
 
 
