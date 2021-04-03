@@ -36,6 +36,7 @@ import tempfile
 import nibabel as nib
 import numpy as np
 
+
 import matplotlib.pyplot as plt
 import torch
 
@@ -68,7 +69,7 @@ from monai.transforms import (
     ToTensord,
 )
 from monai.utils import first, set_determinism
-
+from numpy import clip, asarray
 from skimage import measure
 from skimage.measure import label
 
@@ -363,14 +364,7 @@ with torch.no_grad():
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
                        output_postfix="seg_lungs",
                        output_ext=".nii.gz",
-                       resample=True,
-                       #align_corners=True,
-                       dtype=np.bool,
-                       output_dtype=np.bool
                        )
-
-
-
 
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
@@ -416,6 +410,15 @@ with torch.no_grad():
             both_lungs = largest(val_outputs_1)
             both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(bool)
+
+        #pixels = asarray(both_lungs)
+        #pixels = pixels.astype('float32')
+        #mean, std = pixels.mean(), pixels.std()
+        #pixels = (pixels - mean) / std
+        #pixels = clip(pixels, -1.0, 1.0)
+        #pixels = (pixels + 1.0) / 2.0
+
+        #both_lungs = both_lungs.astype(dtype = np.bool)
 
 
         saver.save_batch(both_lungs, test_data["image_meta_dict"])
