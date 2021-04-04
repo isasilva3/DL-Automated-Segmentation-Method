@@ -405,11 +405,11 @@ with torch.no_grad():
         if ndimage.sum(second_lung) >= g:
             both_lungs = first_lung + second_lung
             both_lungs = both_lungs.cpu().clone().numpy()
-            both_lungs = both_lungs.astype(bool)
+            both_lungs = both_lungs.astype(np.bool)
         else:
             both_lungs = largest(val_outputs_1)
             both_lungs = both_lungs.cpu().clone().numpy()
-            both_lungs = both_lungs.astype(bool)
+            both_lungs = both_lungs.astype(np.bool)
 
         #pixels = asarray(both_lungs)
         #pixels = pixels.astype('float32')
