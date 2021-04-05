@@ -404,12 +404,8 @@ with torch.no_grad():
 
         if ndimage.sum(second_lung) >= g:
             both_lungs = first_lung + second_lung
-            both_lungs = both_lungs.cpu().clone().numpy()
-            both_lungs = both_lungs.astype(np.bool)
         else:
             both_lungs = largest(val_outputs_1)
-            both_lungs = both_lungs.cpu().clone().numpy()
-            both_lungs = both_lungs.astype(np.bool)
 
         #pixels = asarray(both_lungs)
         #pixels = pixels.astype('float32')
@@ -418,7 +414,8 @@ with torch.no_grad():
         #pixels = clip(pixels, -1.0, 1.0)
         #pixels = (pixels + 1.0) / 2.0
 
-        #both_lungs = both_lungs.astype(dtype = np.bool)
+        both_lungs = both_lungs.cpu().clone().numpy()
+        both_lungs = both_lungs.astype(np.bool)
 
 
         saver.save_batch(both_lungs, test_data["image_meta_dict"])
