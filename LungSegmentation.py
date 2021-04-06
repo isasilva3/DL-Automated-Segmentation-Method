@@ -420,21 +420,17 @@ with torch.no_grad():
         both_lungs = both_lungs.astype(np.bool)
 
 
-
-
-
-
 #Header information
 
 #nii.hdr.dime.bitpix = 4;
 #nii.hdr.dime.datatype = 2;
 
-
+        print(val_data["image_meta_dict"])
 
 
         saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
-        #experimentar com o test files
+
 
 
 
