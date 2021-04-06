@@ -365,10 +365,7 @@ with torch.no_grad():
                        output_postfix="seg_lungs",
                        output_ext=".nii.gz",
                        mode="nearest",
-                       padding_mode = "zeros",
-                       #align_corners = True,
-                       #dtype = np.bool,
-                       #output_dtype= np.bool
+                       padding_mode = "zeros"
                       )
 
     for i, test_data in enumerate(test_loader):
@@ -425,7 +422,19 @@ with torch.no_grad():
 
 
 
-        saver.save_batch(both_lungs, test_data["image_meta_dict"])
+
+
+#Header information
+
+#nii.hdr.dime.bitpix = 4;
+#nii.hdr.dime.datatype = 2;
+
+
+
+
+        saver.save_batch(both_lungs, test_files["image_meta_dict"])
+
+        #experimentar com o test files
 
 
 
