@@ -21,6 +21,7 @@ Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
 
 """
+import ants as ants
 import numpy
 import skimage
 from scipy import ndimage
@@ -35,7 +36,7 @@ import shutil
 import tempfile
 import nibabel as nib
 import numpy as np
-
+import ants
 
 import matplotlib.pyplot as plt
 import torch
@@ -418,6 +419,9 @@ with torch.no_grad():
 
         both_lungs = both_lungs.cpu().clone().numpy()
         both_lungs = both_lungs.astype(np.bool)
+
+        image_header = ants.image_header_info('//home//imoreira//Data//Lungs//labelsTr//CNS051_lungs.nii.gz')
+        print(image_header)
 
 
 #Header information
