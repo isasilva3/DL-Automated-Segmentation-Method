@@ -420,8 +420,8 @@ with torch.no_grad():
         both_lungs = both_lungs.cpu().clone().numpy()
         both_lungs = both_lungs.astype(np.bool)
 
-        image_header = ants.image_header_info('//home//imoreira//Data//Lungs//labelsTr//CNS051_lungs.nii.gz')
-        print(image_header)
+        #image_header = ants.image_header_info('//home//imoreira//Data//Lungs//labelsTr//CNS051_lungs.nii.gz')
+        #print(image_header)
 
 
 #Header information
