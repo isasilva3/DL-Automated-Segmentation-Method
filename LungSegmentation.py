@@ -364,7 +364,12 @@ with torch.no_grad():
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
                        output_postfix="seg_lungs",
                        output_ext=".nii.gz",
-                       )
+                       mode="nearest",
+                       padding_mode = "zeros",
+                       #align_corners = True,
+                       #dtype = np.bool,
+                       #output_dtype= np.bool
+                      )
 
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
@@ -418,7 +423,10 @@ with torch.no_grad():
         both_lungs = both_lungs.astype(np.bool)
 
 
+
+
         saver.save_batch(both_lungs, test_data["image_meta_dict"])
+
 
 
 
