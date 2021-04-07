@@ -21,6 +21,7 @@ Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
 
 """
+
 import ants as ants
 import numpy
 import skimage
@@ -428,6 +429,11 @@ with torch.no_grad():
 
 #nii.hdr.dime.bitpix = 4;
 #nii.hdr.dime.datatype = 2;
+
+        for datatype in val_data:
+            val_data['datatype'] = 2
+            val_data['bitpix'] = 4
+
 
         print(val_data["image_meta_dict"])
 
