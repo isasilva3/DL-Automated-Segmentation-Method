@@ -430,7 +430,7 @@ with torch.no_grad():
 #nii.hdr.dime.bitpix = 4;
 #nii.hdr.dime.datatype = 2;
 
-        for datatype in val_data:
+        for datatype in val_data.keys():
             val_data['datatype'] = 2
             val_data['bitpix'] = 4
 
