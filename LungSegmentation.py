@@ -434,9 +434,7 @@ with torch.no_grad():
             val_data['datatype'] = 2
             val_data['bitpix'] = 4
 
-
-        print(val_data["image_meta_dict"])
-
+        #print(val_data["image_meta_dict"])
 
         saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
