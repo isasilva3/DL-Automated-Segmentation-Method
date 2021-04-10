@@ -438,7 +438,7 @@ with torch.no_grad():
 
         saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
-
+        print("Finish!!")
 
 
 
