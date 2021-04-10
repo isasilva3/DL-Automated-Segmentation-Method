@@ -431,8 +431,8 @@ with torch.no_grad():
 #nii.hdr.dime.datatype = 2;
 
         for datatype in val_data["image_meta_dict"]:
-            val_data['datatype'] = 2
-            val_data['bitpix'] = 4
+            val_data['nii.hdr..dime.bitpix'] = 4
+            val_data['nii.hdr..dime.datatype'] = 2
 
         #print(val_data["image_meta_dict"])
 
