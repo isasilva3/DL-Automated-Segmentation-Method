@@ -364,7 +364,7 @@ model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
-                       output_postfix="seg_lungs",
+                       output_postfix="new_seg_lungs",
                        output_ext=".nii.gz",
                        mode="nearest",
                        padding_mode = "zeros"
