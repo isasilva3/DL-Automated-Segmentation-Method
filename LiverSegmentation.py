@@ -234,7 +234,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 200
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -335,12 +335,8 @@ with torch.no_grad():
     saver = NiftiSaver(output_dir='//home//imoreira//Liver_Segs_Out',
                        output_postfix="seg_liver",
                        output_ext=".nii.gz",
-                       #resample=True,
-                       #mode=constant,
-                       #padding_mode=GridSamplePadMode.BORDER,
-                       #align_corners=False,
-                       #dtype=np.float64,
-                       #output_dtype=np.float32
+                       mode="nearest",
+                       padding_mode="zeros"
                        )
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
@@ -351,6 +347,14 @@ with torch.no_grad():
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         val_outputs = largest(val_outputs)
+
+        val_outputs = val_outputs.cpu().clone().numpy()
+        val_outputs = val_outputs.astype(np.bool)
+
+        for datatype in test_data["image_meta_dict"]:
+            test_data['nii.hdr.dime.bitpix'] = 4
+            test_data['nii.hdr.dime.datatype'] = 2
+
         saver.save_batch(val_outputs, test_data["image_meta_dict"])
 
 

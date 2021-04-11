@@ -261,7 +261,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 10
+epoch_num = 200
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
