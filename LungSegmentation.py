@@ -261,7 +261,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 5
+epoch_num = 200
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -423,7 +423,7 @@ with torch.no_grad():
             test_data['bitpix'] = (torch.tensor([32], dtype=torch.int16))//8
             test_data['datatype'] = (torch.tensor([8], dtype=torch.int16))//8
 
-        print(test_data["image_meta_dict"])
+        #print(test_data["image_meta_dict"])
 
         saver.save_batch(both_lungs, test_data["image_meta_dict"])
 
