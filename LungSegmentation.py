@@ -430,13 +430,13 @@ with torch.no_grad():
 #nii.hdr.dime.bitpix = 4;
 #nii.hdr.dime.datatype = 2;
 
-        for datatype in val_data["image_meta_dict"]:
-            val_data['nii.hdr..dime.bitpix'] = 4
-            val_data['nii.hdr..dime.datatype'] = 2
+        for datatype in test_data["image_meta_dict"]:
+            test_data['nii.hdr..dime.bitpix'] = 4
+            test_data['nii.hdr..dime.datatype'] = 2
 
         #print(val_data["image_meta_dict"])
 
-        saver.save_batch(both_lungs, val_data["image_meta_dict"])
+        saver.save_batch(both_lungs, test_data["image_meta_dict"])
 
         print("Finish!!")
 
