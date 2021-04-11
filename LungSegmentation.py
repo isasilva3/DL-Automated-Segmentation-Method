@@ -419,7 +419,7 @@ with torch.no_grad():
 #nii.hdr.dime.bitpix = 4;
 #nii.hdr.dime.datatype = 2;
 
-        for datatype in test_data["image_meta_dict"]:
+        for i in test_data["image_meta_dict"]:
             test_data['bitpix'] = torch.tensor([32], dtype=torch.int16)//8
             test_data['datatype'] = torch.tensor([8], dtype=torch.int16)//8
 
