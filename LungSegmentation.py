@@ -364,7 +364,7 @@ model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Segmentations')
     saver = NiftiSaver(output_dir='//home//imoreira//Segmentations',
-                       output_postfix="new_seg_lungs",
+                       output_postfix="seg_lungs",
                        output_ext=".nii.gz",
                        mode="nearest",
                        padding_mode = "zeros"
@@ -408,18 +408,14 @@ with torch.no_grad():
 
         if ndimage.sum(second_lung) >= g:
             both_lungs = first_lung + second_lung
+            both_lungs = both_lungs.cpu().clone().numpy()
+            both_lungs = both_lungs.astype(np.bool)
         else:
             both_lungs = largest(val_outputs_1)
+            both_lungs = both_lungs.cpu().clone().numpy()
+            both_lungs = both_lungs.astype(np.bool)
 
-        #pixels = asarray(both_lungs)
-        #pixels = pixels.astype('float32')
-        #mean, std = pixels.mean(), pixels.std()
-        #pixels = (pixels - mean) / std
-        #pixels = clip(pixels, -1.0, 1.0)
-        #pixels = (pixels + 1.0) / 2.0
 
-        both_lungs = both_lungs.cpu().clone().numpy()
-        both_lungs = both_lungs.astype(np.bool)
 
         #image_header = ants.image_header_info('//home//imoreira//Data//Lungs//labelsTr//CNS051_lungs.nii.gz')
         #print(image_header)
@@ -431,8 +427,8 @@ with torch.no_grad():
 #nii.hdr.dime.datatype = 2;
 
         for datatype in test_data["image_meta_dict"]:
-            test_data['nii.hdr..dime.bitpix'] = 4
-            test_data['nii.hdr..dime.datatype'] = 2
+            test_data['nii.hdr.dime.bitpix'] = 4
+            test_data['nii.hdr.dime.datatype'] = 2
 
         #print(val_data["image_meta_dict"])
 
