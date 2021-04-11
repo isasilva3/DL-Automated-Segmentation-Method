@@ -261,7 +261,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 5
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -395,14 +395,7 @@ with torch.no_grad():
         #else:
             #both_lungs = largest(val_outputs)
 
-        #c = largest(val_outputs_1)
-        #d = largest(val_outputs_2 - first_lung)
 
-        #e = ndimage.sum(d)
-        #f = ndimage.sum(c)
-
-        #size = ndimage.sum(second_lung)
-        #print("The size is:", size)
 
         g = ndimage.sum(first_lung) * 0.10
 
@@ -427,14 +420,14 @@ with torch.no_grad():
 #nii.hdr.dime.datatype = 2;
 
         for datatype in test_data["image_meta_dict"]:
-            test_data['nii.hdr.dime.bitpix'] = 4
-            test_data['nii.hdr.dime.datatype'] = 2
+            test_data['bitpix'] = torch.tensor([32], dtype=torch.int16)//8
+            test_data['datatype'] = torch.tensor([8], dtype=torch.int16)//8
 
         print(test_data["image_meta_dict"])
 
         saver.save_batch(both_lungs, test_data["image_meta_dict"])
 
-        print("Finish!!")
+print("FINISH!!")
 
 
 
