@@ -430,7 +430,7 @@ with torch.no_grad():
             test_data['nii.hdr.dime.bitpix'] = 4
             test_data['nii.hdr.dime.datatype'] = 2
 
-        #print(val_data["image_meta_dict"])
+        print(test_data["image_meta_dict"])
 
         saver.save_batch(both_lungs, test_data["image_meta_dict"])
 
