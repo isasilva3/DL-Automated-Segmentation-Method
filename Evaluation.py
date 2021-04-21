@@ -9,21 +9,21 @@ from surface_distance import metrics, compute_surface_distances, compute_robust_
     compute_average_surface_distance
 
 
-gdth_path="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Test\\"
-gdth_path_val="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Val\\"
-gdth_path_train="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Train\\"
-pred_path='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Test\\'
-mas_path='C:\\Users\\isasi\\Downloads\\Metrics\\MAS\\'
-val_path ='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Val\\'
-train_path ='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Train\\'
+#gdth_path="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Test\\"
+#gdth_path_val="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Val\\"
+#gdth_path_train="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Train\\"
+#pred_path='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Test\\'
+#mas_path='C:\\Users\\isasi\\Downloads\\Metrics\\MAS\\'
+#val_path ='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Val\\'
+#train_path ='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Train\\'
 
-#gdth_path="/home/imoreira/Metrics/Labels/Test/"
-#gdth_path_val="/home/imoreira/Metrics/Labels/Val/"
-#gdth_path_train="/home/imoreira/Metrics/Labels/Train/"
-#pred_path='/home/imoreira/Metrics/Pred/Test/'
-#mas_path='/home/imoreira/Metrics/MAS/'
-#val_path='/home/imoreira/Metrics/Pred/Val/'
-#train_path='/home/imoreira/Metrics/Pred/Train/'
+gdth_path="/home/imoreira/Metrics/Labels/Test/"
+gdth_path_val="/home/imoreira/Metrics/Labels/Val/"
+gdth_path_train="/home/imoreira/Metrics/Labels/Train/"
+pred_path='/home/imoreira/Metrics/Pred/Test/'
+mas_path='/home/imoreira/Metrics/MAS/'
+val_path='/home/imoreira/Metrics/Pred/Val/'
+train_path='/home/imoreira/Metrics/Pred/Train/'
 
 _, _, filenames_gd = next(os.walk(gdth_path))
 _, _, filenames_gd_v = next(os.walk(gdth_path_val))
@@ -948,8 +948,8 @@ hausdorff_train_lungs.append(hausdorff_train[98])
 
 #CREATE EXCEL FILE
 
-#workbook = xlsxwriter.Workbook('/home/imoreira/Metrics/Labels/Test/EvaluationMetrics.xlsx')
-workbook = xlsxwriter.Workbook('C:\\Users\\isasi\\Downloads\\Metrics\\EvaluationMetrics.xlsx')
+workbook = xlsxwriter.Workbook('/home/imoreira/Metrics/Labels/Test/EvaluationMetrics.xlsx')
+#workbook = xlsxwriter.Workbook('C:\\Users\\isasi\\Downloads\\Metrics\\EvaluationMetrics.xlsx')
 
 worksheet = workbook.add_worksheet()
 
