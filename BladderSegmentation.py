@@ -351,4 +351,4 @@ with torch.no_grad():
         val_outputs = val_outputs.astype(np.bool)
 
 
-        saver.save_batch(val_outputs, train_data["image_meta_dict"])
+        saver.save_batch(val_outputs, val_data["image_meta_dict"])

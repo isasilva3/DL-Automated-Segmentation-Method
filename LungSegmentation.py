@@ -408,7 +408,7 @@ with torch.no_grad():
             both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(np.bool)
 
-        saver.save_batch(both_lungs, train_data["image_meta_dict"])
+        saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
 print("FINISH!!")
 
