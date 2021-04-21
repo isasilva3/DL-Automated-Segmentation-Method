@@ -22,7 +22,7 @@ gdth_path_val="/home/imoreira/Metrics/Labels/Val/"
 gdth_path_train="/home/imoreira/Metrics/Labels/Train/"
 pred_path='/home/imoreira/Metrics/Pred/Test/'
 mas_path='/home/imoreira/Metrics/MAS/'
-val_path='/home/imoreira/Metrics/Pred/val/'
+val_path='/home/imoreira/Metrics/Pred/Val/'
 train_path='/home/imoreira/Metrics/Pred/Train/'
 
 _, _, filenames_gd = next(os.walk(gdth_path))
