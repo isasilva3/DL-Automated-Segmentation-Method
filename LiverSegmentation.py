@@ -234,7 +234,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 10
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -351,7 +351,7 @@ with torch.no_grad():
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
 
-        saver.save_batch(val_outputs, val_data["image_meta_dict"])
+        saver.save_batch(val_outputs, train_data["image_meta_dict"])
 
 
 
