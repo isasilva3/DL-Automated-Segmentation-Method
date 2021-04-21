@@ -9,21 +9,21 @@ from surface_distance import metrics, compute_surface_distances, compute_robust_
     compute_average_surface_distance
 
 
-#gdth_path="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Test\\"
-#gdth_path_val="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Val\\"
-#gdth_path_train="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Train\\"
-#pred_path='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Test\\'
-#mas_path='C:\\Users\\isasi\\Downloads\\Metrics\\MAS\\'
-#val_path ='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Val\\'
-#train_path ='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Train\\'
+gdth_path="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Test\\"
+gdth_path_val="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Val\\"
+gdth_path_train="C:\\Users\\isasi\\Downloads\\Metrics\\Labels\\Train\\"
+pred_path='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Test\\'
+mas_path='C:\\Users\\isasi\\Downloads\\Metrics\\MAS\\'
+val_path ='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Val\\'
+train_path ='C:\\Users\\isasi\\Downloads\\Metrics\\Pred\\Train\\'
 
-gdth_path="/home/imoreira/Metrics/Labels/Test/"
-gdth_path_val="/home/imoreira/Metrics/Labels/Val/"
-gdth_path_train="/home/imoreira/Metrics/Labels/Train/"
-pred_path='/home/imoreira/Metrics/Pred/Test/'
-mas_path='/home/imoreira/Metrics/MAS/'
-val_path='/home/imoreira/Metrics/Pred/Val/'
-train_path='/home/imoreira/Metrics/Pred/Train/'
+#gdth_path="/home/imoreira/Metrics/Labels/Test/"
+#gdth_path_val="/home/imoreira/Metrics/Labels/Val/"
+#gdth_path_train="/home/imoreira/Metrics/Labels/Train/"
+#pred_path='/home/imoreira/Metrics/Pred/Test/'
+#mas_path='/home/imoreira/Metrics/MAS/'
+#val_path='/home/imoreira/Metrics/Pred/Val/'
+#train_path='/home/imoreira/Metrics/Pred/Train/'
 
 _, _, filenames_gd = next(os.walk(gdth_path))
 _, _, filenames_gd_v = next(os.walk(gdth_path_val))
@@ -145,7 +145,7 @@ for i in filenames_train:
 
 print(gdth_list)
 print(pred_list)
-
+'''
 for f in gdth_list:
     gdth_data = nib.load(f)
     gdth_data_np = gdth_data.get_fdata()
@@ -163,7 +163,7 @@ for f in gdth_val_list:
 
     gdth_val_arr = np.asarray(gdth_val_data_np).astype(np.bool)
     gdth_val_arr_list.append(gdth_val_arr)
-
+'''
 for f in gdth_train_list:
     gdth_train_data = nib.load(f)
     gdth_train_data_np = gdth_train_data.get_fdata()
@@ -174,7 +174,7 @@ for f in gdth_train_list:
     gdth_train_arr_list.append(gdth_train_arr)
 
 #print(gdth_images)
-
+'''
 for i in pred_list:
     pred_data = nib.load(i)
     pred_data = pred_data.get_fdata()
@@ -195,7 +195,7 @@ for i in val_list:
     val_arr = np.asarray(val_data).astype(np.bool)
     val_arr = np.squeeze(val_arr)
     val_arr_l.append(val_arr)
-
+'''
 for i in train_list:
     train_data = nib.load(i)
     train_data = train_data.get_fdata()
@@ -209,6 +209,8 @@ for i in train_list:
 g = 0
 m = 0
 n = 0
+
+'''
 
 for m in range(len(gdth_arr_list)):
 
@@ -442,7 +444,7 @@ for m in range(len(gdth_val_arr_list)):
                 break
 
     break
-
+'''
 for m in range(len(gdth_train_arr_list)):
 
     for n in range(len(train_arr_l)):
@@ -946,8 +948,8 @@ hausdorff_train_lungs.append(hausdorff_train[98])
 
 #CREATE EXCEL FILE
 
-workbook = xlsxwriter.Workbook('/home/imoreira/Metrics/Labels/Test/EvaluationMetrics.xlsx')
-#workbook = xlsxwriter.Workbook('C:\\Users\\isasi\\Downloads\\Metrics\\EvaluationMetrics.xlsx')
+#workbook = xlsxwriter.Workbook('/home/imoreira/Metrics/Labels/Test/EvaluationMetrics.xlsx')
+workbook = xlsxwriter.Workbook('C:\\Users\\isasi\\Downloads\\Metrics\\EvaluationMetrics.xlsx')
 
 worksheet = workbook.add_worksheet()
 
