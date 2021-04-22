@@ -127,11 +127,11 @@ train_transforms = Compose(
         ScaleIntensityRanged(
             keys=["image"], a_min=-160, a_max=60, b_min=0.0, b_max=1.0, clip=True,
         ),
-        #CropForegroundd(keys=["image", "label"], source_key="image"),
+        CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
             keys=["image", "label"],
             label_key="label",
-            #spatial_size=(96, 96, 96),
+            spatial_size=(96, 96, 96),
             pos=1,
             neg=1,
             num_samples=4,
