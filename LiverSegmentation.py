@@ -139,8 +139,8 @@ train_transforms = Compose(
             image_threshold=0,
         ),
         # user can also add other random transforms
-        RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
-                     rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
+        #RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
+        #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
         ToTensord(keys=["image", "label"]),
     ]
 )
@@ -338,8 +338,8 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, train_data in enumerate(train_loader):
-        test_images = train_data["image"].to(device)
+    for i, train_data in enumerate(val_loader):
+        train_images = train_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs = sliding_window_inference(
