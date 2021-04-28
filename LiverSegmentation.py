@@ -117,7 +117,6 @@ The image centers of negative samples must be in valid body area.
 """
 
 
-
 train_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
@@ -125,9 +124,9 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-160, a_max=60, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
         ),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
             keys=["image", "label"],
             label_key="label",
@@ -139,8 +138,20 @@ train_transforms = Compose(
             image_threshold=0,
         ),
         # user can also add other random transforms
-        #RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
+        # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
+        ToTensord(keys=["image", "label"]),
+    ]
+)
+train_inf_transforms = Compose(
+    [
+        LoadImaged(keys=["image", "label"]),
+        AddChanneld(keys=["image", "label"]),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
+        ),
         ToTensord(keys=["image", "label"]),
     ]
 )
@@ -205,6 +216,10 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
 train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
+
+
+train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
+train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=0)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
@@ -338,7 +353,7 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, train_data in enumerate(val_loader):
+    for i, train_data in enumerate(train_inf_loader):
         train_images = train_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
