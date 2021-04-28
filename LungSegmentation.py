@@ -152,7 +152,7 @@ train_transforms = Compose(
         ScaleIntensityRanged(
             keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
         ),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
            keys=["image", "label"],
            label_key="label",
@@ -370,16 +370,16 @@ with torch.no_grad():
                        padding_mode = "zeros"
                       )
 
-    for i, test_data in enumerate(test_loader):
-        test_images = test_data["image"].to(device)
+    for i, train_data in enumerate(val_loader):
+        train_images = train_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model
+            train_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_2 = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model
+            train_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
@@ -408,7 +408,7 @@ with torch.no_grad():
             both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(np.bool)
 
-        saver.save_batch(both_lungs, test_data["image_meta_dict"])
+        saver.save_batch(both_lungs, train_data["image_meta_dict"])
 
 print("FINISH!!")
 

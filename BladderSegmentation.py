@@ -128,16 +128,16 @@ train_transforms = Compose(
             keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
-        #RandCropByPosNegLabeld(
-        #    keys=["image", "label"],
-        #    label_key="label",
-        #    spatial_size=(96, 96, 96),
-        #    pos=1,
-        #    neg=1,
-        #    num_samples=4,
-        #    image_key="image",
-        #    image_threshold=0,
-        #),
+        RandCropByPosNegLabeld(
+            keys=["image", "label"],
+            label_key="label",
+            spatial_size=(96, 96, 96),
+            pos=1,
+            neg=1,
+            num_samples=4,
+            image_key="image",
+            image_threshold=0,
+        ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -337,7 +337,7 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, train_data in enumerate(train_loader):
+    for i, train_data in enumerate(val_loader):
         train_images = train_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
