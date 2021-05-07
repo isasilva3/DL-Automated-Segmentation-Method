@@ -28,6 +28,8 @@ import skimage
 from scipy import ndimage
 from skimage.viewer.plugins import measure
 
+from MONAI.monai.transforms import Rand3DElastic, RandGaussianNoise, RandScaleIntensity, RandGaussianSmooth, \
+    RandAdjustContrast
 
 """## Setup imports"""
 
@@ -162,6 +164,40 @@ train_transforms = Compose(
             num_samples=4,
             image_key="image",
             image_threshold=0,
+        ),
+        #Rand3DElastic(
+        #    sigma_range=,
+        #    magnitude_range=,
+        #    prob=,
+        #    rotate_range=,
+        #    shear_range=,
+        #    translate_range=,
+        #    scale_range=,
+        #    spatial_size=,
+        #    mode=,
+        #    padding_mode=,
+        #    as_tensor_output=
+
+        #),
+        RandGaussianNoise(
+            prob=0.1,
+            mean=0.0,
+            std=0.1
+        ),
+        #RandScaleIntensity(
+        #    factors=["image", "label"],
+        #    prob=0.1
+        #),
+        RandGaussianSmooth(
+            sigma_x=(0.25, 1.5),
+            sigma_y=(0.25, 1.5),
+            sigma_z=(0.25, 1.5),
+            prob=0.1,
+            approx='erf'
+        ),
+        RandAdjustContrast(
+            prob=0.1,
+            gamma=(0.5, 4.5)
         ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
@@ -386,16 +422,16 @@ with torch.no_grad():
                        padding_mode = "zeros"
                       )
 
-    for i, train_data in enumerate(train_inf_loader):
-        train_images = train_data["image"].to(device)
+    for i, val_data in enumerate(val_loader):
+        val_images = val_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
-            train_images, roi_size, sw_batch_size, model
+            val_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_2 = sliding_window_inference(
-            train_images, roi_size, sw_batch_size, model
+            val_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
@@ -424,7 +460,7 @@ with torch.no_grad():
             both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(np.bool)
 
-        saver.save_batch(both_lungs, train_data["image_meta_dict"])
+        saver.save_batch(both_lungs, val_data["image_meta_dict"])
 
 print("FINISH!!")
 
