@@ -186,10 +186,10 @@ train_transforms = Compose(
             std=0.1
             #allow_missing_keys=False
         ),
-        RandScaleIntensityd(
-            keys=["image", "label"],
-            prob=0.1
-        ),
+        #RandScaleIntensityd(
+        #    keys=["image", "label"],
+        #    prob=0.1
+        #),
         RandGaussianSmoothd(
             keys=["image", "label"],
             sigma_x=(0.25, 1.5),
