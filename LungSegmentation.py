@@ -29,7 +29,7 @@ from scipy import ndimage
 from skimage.viewer.plugins import measure
 
 from MONAI.monai.transforms import Rand3DElastic, RandGaussianNoise, RandScaleIntensity, RandGaussianSmooth, \
-    RandAdjustContrast
+    RandAdjustContrast, RandGaussianSmoothd, RandGaussianNoised, RandAdjustContrastd, RandScaleIntensityd
 
 """## Setup imports"""
 
@@ -179,25 +179,31 @@ train_transforms = Compose(
         #    as_tensor_output=
 
         #),
-        RandGaussianNoise(
+        RandGaussianNoised(
+            keys=["image", "label"],
             prob=0.1,
             mean=0.0,
             std=0.1
+            #allow_missing_keys=False
         ),
-        #RandScaleIntensity(
-        #    factors=["image", "label"],
-        #    prob=0.1
-        #),
-        RandGaussianSmooth(
+        RandScaleIntensityd(
+            keys=["image", "label"],
+            prob=0.1
+        ),
+        RandGaussianSmoothd(
+            keys=["image", "label"],
             sigma_x=(0.25, 1.5),
             sigma_y=(0.25, 1.5),
             sigma_z=(0.25, 1.5),
             prob=0.1,
-            approx='erf'
+            approx='erf',
+            allow_missing_keys=False
         ),
-        RandAdjustContrast(
+        RandAdjustContrastd(
+            keys=["image", "label"],
             prob=0.1,
-            gamma=(0.5, 4.5)
+            gamma=(0.5, 4.5),
+            #allow_missing_keys=False
         ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
