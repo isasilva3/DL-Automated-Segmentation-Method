@@ -197,7 +197,7 @@ train_transforms = Compose(
             sigma_z=(0.25, 1.5),
             prob=0.1,
             approx='erf',
-            allow_missing_keys=False
+            #allow_missing_keys=False
         ),
         RandAdjustContrastd(
             keys=["image", "label"],
