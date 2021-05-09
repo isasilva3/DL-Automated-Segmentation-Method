@@ -21,7 +21,8 @@ Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
 
 """
-
+from MONAI.monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
+    RandAdjustContrastd
 
 """## Setup imports"""
 
@@ -137,6 +138,48 @@ train_transforms = Compose(
             num_samples=4,
             image_key="image",
             image_threshold=0,
+        ),
+        Rand3DElasticd(
+            keys=["image", "label"],
+            sigma_range=(0, 1),
+            magnitude_range=(0,1),
+            spatial_size=None,
+            prob=0.1,
+            rotate_range=None,
+            shear_range=None,
+            translate_range=None,
+            scale_range=None,
+            mode="nearest",
+            padding_mode="zeros",
+            as_tensor_output=False
+
+        ),
+        RandGaussianNoised(
+            keys=["image", "label"],
+            prob=0.1,
+            mean=0.0,
+            std=0.1
+            #allow_missing_keys=False
+        ),
+        RandScaleIntensityd(
+            keys=["image", "label"],
+            factors=0.1,
+            prob=0.1
+        ),
+        RandGaussianSmoothd(
+            keys=["image", "label"],
+            sigma_x=(0.25, 1.5),
+            sigma_y=(0.25, 1.5),
+            sigma_z=(0.25, 1.5),
+            prob=0.1,
+            approx='erf'
+            #allow_missing_keys=False
+        ),
+        RandAdjustContrastd(
+            keys=["image", "label"],
+            prob=0.1,
+            gamma=(0.5, 2)
+            #allow_missing_keys=False
         ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
@@ -353,12 +396,12 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, train_data in enumerate(train_inf_loader):
-        train_images = train_data["image"].to(device)
+    for i, val_data in enumerate(val_loader):
+        val_images = val_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs = sliding_window_inference(
-            train_images, roi_size, sw_batch_size, model
+            val_images, roi_size, sw_batch_size, model
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         val_outputs = largest(val_outputs)
@@ -367,4 +410,4 @@ with torch.no_grad():
         val_outputs = val_outputs.astype(np.bool)
 
 
-        saver.save_batch(val_outputs, train_data["image_meta_dict"])
+        saver.save_batch(val_outputs, val_data["image_meta_dict"])

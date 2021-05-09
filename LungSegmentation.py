@@ -29,7 +29,8 @@ from scipy import ndimage
 from skimage.viewer.plugins import measure
 
 from MONAI.monai.transforms import Rand3DElastic, RandGaussianNoise, RandScaleIntensity, RandGaussianSmooth, \
-    RandAdjustContrast, RandGaussianSmoothd, RandGaussianNoised, RandAdjustContrastd, RandScaleIntensityd
+    RandAdjustContrast, RandGaussianSmoothd, RandGaussianNoised, RandAdjustContrastd, RandScaleIntensityd, \
+    Rand3DElasticd
 
 """## Setup imports"""
 
@@ -165,20 +166,21 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        #Rand3DElastic(
-        #    sigma_range=,
-        #    magnitude_range=,
-        #    prob=,
-        #    rotate_range=,
-        #    shear_range=,
-        #    translate_range=,
-        #    scale_range=,
-        #    spatial_size=,
-        #    mode=,
-        #    padding_mode=,
-        #    as_tensor_output=
+        Rand3DElasticd(
+            keys=["image", "label"],
+            sigma_range=(0, 1),
+            magnitude_range=(0,1),
+            spatial_size=None,
+            prob=0.1,
+            rotate_range=None,
+            shear_range=None,
+            translate_range=None,
+            scale_range=None,
+            mode="nearest",
+            padding_mode="zeros",
+            as_tensor_output=False
 
-        #),
+        ),
         RandGaussianNoised(
             keys=["image", "label"],
             prob=0.1,
@@ -186,23 +188,24 @@ train_transforms = Compose(
             std=0.1
             #allow_missing_keys=False
         ),
-        #RandScaleIntensityd(
-        #    keys=["image", "label"],
-        #    prob=0.1
-        #),
+        RandScaleIntensityd(
+            keys=["image", "label"],
+            factors=0.1,
+            prob=0.1
+        ),
         RandGaussianSmoothd(
             keys=["image", "label"],
             sigma_x=(0.25, 1.5),
             sigma_y=(0.25, 1.5),
             sigma_z=(0.25, 1.5),
             prob=0.1,
-            approx='erf',
+            approx='erf'
             #allow_missing_keys=False
         ),
         RandAdjustContrastd(
             keys=["image", "label"],
             prob=0.1,
-            gamma=(0.5, 4.5),
+            gamma=(0.5, 2)
             #allow_missing_keys=False
         ),
         # user can also add other random transforms
