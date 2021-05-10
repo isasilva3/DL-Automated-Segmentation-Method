@@ -176,8 +176,8 @@ train_transforms = Compose(
             shear_range=None,
             translate_range=None,
             scale_range=None,
-            mode="bilinear",
-            padding_mode="reflection",
+            mode="nearest",
+            padding_mode="zeros",
             as_tensor_output=False
 
         ),
