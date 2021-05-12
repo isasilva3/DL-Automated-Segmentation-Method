@@ -142,44 +142,44 @@ train_transforms = Compose(
         Rand3DElasticd(
             keys=["image", "label"],
             sigma_range=(0, 1),
-            magnitude_range=(0,1),
+            magnitude_range=(0, 1),
             spatial_size=None,
             prob=0.1,
-            rotate_range=None,
+            rotate_range=(-5, 5),  # -15, 15 / -5, 5
             shear_range=None,
             translate_range=None,
             scale_range=None,
-            mode="nearest",
+            mode=("bilinear", "nearest"),
             padding_mode="zeros",
             as_tensor_output=False
 
         ),
         RandGaussianNoised(
-            keys=["image", "label"],
+            keys=["image"],
             prob=0.1,
             mean=0.0,
             std=0.1
-            #allow_missing_keys=False
+            # allow_missing_keys=False
         ),
-        #RandScaleIntensityd(
-        #    keys=["image", "label"],
-        #    factors=0.1,
-        #    prob=0.1
-        #),
+        RandScaleIntensityd(
+            keys=["image"],
+            factors=0.05,  # this is 10%, try 5%
+            prob=0.1
+        ),
         RandGaussianSmoothd(
-            keys=["image", "label"],
+            keys=["image"],
             sigma_x=(0.25, 1.5),
             sigma_y=(0.25, 1.5),
             sigma_z=(0.25, 1.5),
             prob=0.1,
             approx='erf'
-            #allow_missing_keys=False
+            # allow_missing_keys=False
         ),
         RandAdjustContrastd(
-            keys=["image", "label"],
+            keys=["image"],
             prob=0.1,
-            gamma=(0.5, 2)
-            #allow_missing_keys=False
+            gamma=(0.9, 1.1)
+            # allow_missing_keys=False
         ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
