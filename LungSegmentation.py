@@ -172,7 +172,7 @@ train_transforms = Compose(
             magnitude_range=(0,1),
             spatial_size=None,
             prob=0.1,
-            rotate_range=(-5, 5), #-15, 15 / -5, 5
+            rotate_range=(-15, 15), #-15, 15 / -5, 5
             shear_range=None,
             translate_range=None,
             scale_range=None,
@@ -190,8 +190,8 @@ train_transforms = Compose(
         ),
         RandScaleIntensityd(
             keys=["image"],
-            factors=0.05, #this is 10%, try 5%
-            prob=0.1
+            factors=0.03, #this is 10%, try 5%
+            prob=0.5
         ),
         RandGaussianSmoothd(
             keys=["image"],
