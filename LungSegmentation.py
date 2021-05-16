@@ -190,7 +190,7 @@ train_transforms = Compose(
         ),
         RandScaleIntensityd(
             keys=["image"],
-            factors=0.05, #this is 10%, try 5%
+            factors=0.02, #this is 10%, try 5%
             prob=0.1
         ),
         RandGaussianSmoothd(
