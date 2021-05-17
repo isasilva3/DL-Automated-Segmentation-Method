@@ -168,14 +168,14 @@ train_transforms = Compose(
         ),
         Rand3DElasticd(
             keys=["image", "label"],
-            sigma_range=(0, 1),
-            magnitude_range=(0,1),
+            sigma_range=(5, 5),
+            magnitude_range=(100,200),
             spatial_size=None,
-            prob=0.1,
-            rotate_range=(-15, 15), #-15, 15 / -5, 5
+            prob=1.0,
+            rotate_range=(np.pi / 36, np.pi / 36, np.pi), #-15, 15 / -5, 5
             shear_range=None,
             translate_range=None,
-            scale_range=None,
+            scale_range=(0.15, 0.15, 0.15),
             mode=("bilinear", "nearest"),
             padding_mode="zeros",
             as_tensor_output=False
