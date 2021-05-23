@@ -181,18 +181,18 @@ train_transforms = Compose(
         #    as_tensor_output=False
 
         #),
-        RandGaussianNoised(
-            keys=["image"],
-            prob=0.1,
-            mean=0.0,
-            std=0.1
-            #allow_missing_keys=False
-        ),
-        #RandScaleIntensityd(
+        #RandGaussianNoised(
         #    keys=["image"],
-        #    factors=0.02, #this is 10%, try 5%
-        #    prob=0.1
+        #    prob=0.1,
+        #    mean=0.0,
+        #    std=0.1
+            #allow_missing_keys=False
         #),
+        RandScaleIntensityd(
+            keys=["image"],
+            factors=0.02, #this is 10%, try 5%
+            prob=0.1
+        ),
         #RandGaussianSmoothd(
         #    keys=["image"],
         #    sigma_x=(0.25, 1.5),
