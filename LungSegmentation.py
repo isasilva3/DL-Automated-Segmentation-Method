@@ -74,7 +74,7 @@ from monai.transforms import (
     ToTensord,
 )
 from monai.utils import first, set_determinism
-from numpy import clip, asarray
+from numpy import clip, asarray, math
 from skimage import measure
 from skimage.measure import label
 
@@ -172,7 +172,7 @@ train_transforms = Compose(
             magnitude_range=(0, 1),
             spatial_size=None,
             prob=0.1,
-            rotate_range=(-5,5), #-15, 15 / -5, 5
+            rotate_range=(-math.pi/36, math.pi/36), #-15, 15 / -5, 5
             shear_range=None,
             translate_range=None,
             scale_range=(0.15, 0.15, 0.15),
