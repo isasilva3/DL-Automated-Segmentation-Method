@@ -125,7 +125,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-160, a_max=60, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -138,9 +138,9 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        RandFlipd(keys=["image", "label"],
-                  prob=0.1,
-                  spatial_axis=[0, 1]),
+        #RandFlipd(keys=["image", "label"],
+        #          prob=0.1,
+        #          spatial_axis=(0, 1)),
         #Rand3DElasticd(
         #    keys=["image", "label"],
         #    sigma_range=(0, 1),
@@ -168,15 +168,15 @@ train_transforms = Compose(
         #    factors=0.02,  # this is 10%, try 5%
         #    prob=0.5
         #),
-        RandGaussianSmoothd(
-            keys=["image"],
-            sigma_x=(0.25, 1.5),
-            sigma_y=(0.25, 1.5),
-            sigma_z=(0.25, 1.5),
-            prob=0.5,
-            approx='erf'
+        #RandGaussianSmoothd(
+        #    keys=["image"],
+        #    sigma_x=(0.25, 1.5),
+        #    sigma_y=(0.25, 1.5),
+        #    sigma_z=(0.25, 1.5),
+        #    prob=0.1,
+        #    approx='erf'
             # allow_missing_keys=False
-        ),
+        #),
         #RandAdjustContrastd(
         #    keys=["image"],
         #    prob=0.1,
@@ -196,7 +196,7 @@ train_inf_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-160, a_max=60, b_min=0.0, b_max=1.0, clip=True,
         ),
         ToTensord(keys=["image", "label"]),
     ]

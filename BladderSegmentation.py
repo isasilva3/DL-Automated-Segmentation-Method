@@ -139,9 +139,9 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        RandFlipd(keys=["image", "label"],
-                  prob=0.1,
-                  spatial_axis=(0, 1)),
+        #RandFlipd(keys=["image", "label"],
+        #          prob=0.1,
+        #          spatial_axis=(0, 1)),
         # Rand3DElasticd(
         #    keys=["image", "label"],
         #    sigma_range=(0, 1),

@@ -153,7 +153,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-600, a_max=1500, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -166,20 +166,20 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        Rand3DElasticd(
-            keys=["image", "label"],
-            sigma_range=(0, 1),
-            magnitude_range=(0, 1),
-            spatial_size=None,
-            prob=0.1,
-            rotate_range=(-math.pi/36, math.pi/36), #-15, 15 / -5, 5
-            shear_range=None,
-            translate_range=None,
-            scale_range=(0.15, 0.15, 0.15),
-            mode=("bilinear", "nearest"),
-            padding_mode="zeros",
-            as_tensor_output=False
-        ),
+        #Rand3DElasticd(
+        #    keys=["image", "label"],
+        #    sigma_range=(0, 1),
+        #    magnitude_range=(0, 1),
+        #    spatial_size=None,
+        #    prob=0.1,
+        #    rotate_range=(-math.pi/36, math.pi/36), #-15, 15 / -5, 5
+        #    shear_range=None,
+        #    translate_range=None,
+        #    scale_range=(0.15, 0.15, 0.15),
+        #    mode=("bilinear", "nearest"),
+        #    padding_mode="zeros",
+        #    as_tensor_output=False
+        #),
         #RandGaussianNoised(
         #    keys=["image"],
         #    prob=0.1,
@@ -220,7 +220,7 @@ train_inf_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000.0, a_max=500, b_min=0.0, b_max=1.0, clip=True,
         ),
         ToTensord(keys=["image", "label"]),
     ]
@@ -288,7 +288,7 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0) #Shuffle false
 
 
 train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
@@ -343,6 +343,10 @@ for epoch in range(epoch_num):
             batch_data["image"].to(device),
             batch_data["label"].to(device),
         )
+
+        #test_im = inputs'`,`,`,',0«.cpu().tonumpy.()
+        #matplotlib
+
         optimizer.zero_grad()
         outputs = model(inputs)
         loss = loss_function(outputs, labels)
