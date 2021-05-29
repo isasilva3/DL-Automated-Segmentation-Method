@@ -62,6 +62,7 @@ from monai.transforms import (
     ToTensord,
 )
 from monai.utils import first, set_determinism
+from numpy import math
 
 print_config()
 
@@ -145,7 +146,7 @@ train_transforms = Compose(
             magnitude_range=(0, 1),
             spatial_size=None,
             prob=0.1,
-            rotate_range=(-5, 5),  # -15, 15 / -5, 5
+            rotate_range=(-math.pi / 36, math.pi / 36),  # -15, 15 / -5, 5
             shear_range=None,
             translate_range=None,
             scale_range=None,
@@ -153,13 +154,13 @@ train_transforms = Compose(
             padding_mode="zeros",
             as_tensor_output=False
         ),
-        # RandGaussianNoised(
-        #    keys=["image"],
-        #    prob=0.1,
-        #    mean=0.0,
-        #    std=0.1
+        RandGaussianNoised(
+            keys=["image"],
+            prob=0.1,
+            mean=0.0,
+            std=0.1
         # allow_missing_keys=False
-        # ),
+        ),
         # RandScaleIntensityd(
         #    keys=["image"],
         #    factors=0.02,  # this is 10%, try 5%

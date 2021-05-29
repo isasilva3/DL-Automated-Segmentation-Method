@@ -180,13 +180,13 @@ train_transforms = Compose(
             padding_mode="zeros",
             as_tensor_output=False
         ),
-        #RandGaussianNoised(
-        #    keys=["image"],
-        #    prob=0.1,
-        #    mean=0.0,
-        #    std=0.1
+        RandGaussianNoised(
+            keys=["image"],
+            prob=0.1,
+            mean=0.0,
+            std=0.1
             #allow_missing_keys=False
-        #),
+        ),
         #RandScaleIntensityd(
         #    keys=["image"],
         #    factors=0.02, #this is 10%, try 5%
