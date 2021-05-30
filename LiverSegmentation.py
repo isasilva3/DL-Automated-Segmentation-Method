@@ -175,12 +175,12 @@ train_transforms = Compose(
             approx='erf'
             # allow_missing_keys=False
         ),
-        #RandAdjustContrastd(
-        #    keys=["image"],
-        #    prob=0.1,
-        #    gamma=(0.9, 1.1)
+        RandAdjustContrastd(
+            keys=["image"],
+            prob=0.1,
+            gamma=(0.9, 1.1)
             # allow_missing_keys=False
-        #),
+        ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
