@@ -316,7 +316,7 @@ model = UNet(
     strides=(2, 2, 2, 2),
     num_res_units=2,
     norm=Norm.BATCH,
-    #dropout=0.2,
+    dropout=0.2,
 ).to(device)
 loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4)
