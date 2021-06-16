@@ -153,7 +153,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1500, a_max=600, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -201,12 +201,12 @@ train_transforms = Compose(
         #    approx='erf'
             #allow_missing_keys=False
         #),
-        RandAdjustContrastd(
-            keys=["image"],
-            prob=0.1,
-            gamma=(0.9, 1.1)
+        #RandAdjustContrastd(
+        #    keys=["image"],
+        #    prob=0.1,
+        #    gamma=(0.9, 1.1)
            #allow_missing_keys=False
-        ),
+        #),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -220,7 +220,7 @@ train_inf_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1500, a_max=600, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         ToTensord(keys=["image", "label"]),
     ]
@@ -232,7 +232,7 @@ val_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1500, a_max=600, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -247,7 +247,7 @@ test_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1500, a_max=600, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -307,6 +307,7 @@ test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
 # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 #device = torch.device('cpu')
+#Droupout layer, see how the model is define in the library
 model = UNet(
     dimensions=3,
     in_channels=1,
@@ -315,6 +316,7 @@ model = UNet(
     strides=(2, 2, 2, 2),
     num_res_units=2,
     norm=Norm.BATCH,
+    #dropout=0.2,
 ).to(device)
 loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4)
