@@ -166,20 +166,20 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        #Rand3DElasticd(
-        #    keys=["image", "label"],
-        #    sigma_range=(0, 1),
-        #    magnitude_range=(0, 1),
-        #    spatial_size=None,
-        #    prob=0.5,
-        #    rotate_range=(-math.pi/36, math.pi/36), #-15, 15 / -5, 5
-        #    shear_range=None,
-        #    translate_range=None,
-        #    scale_range=(0.15, 0.15, 0.15),
-        #    mode=("bilinear", "nearest"),
-        #    padding_mode="zeros",
-        #    as_tensor_output=False
-        #),
+        Rand3DElasticd(
+            keys=["image", "label"],
+            sigma_range=(0, 1),
+            magnitude_range=(0, 1),
+            spatial_size=None,
+            prob=0.5,
+            rotate_range=(-math.pi/36, math.pi/36), #-15, 15 / -5, 5
+            shear_range=None,
+            translate_range=None,
+            scale_range=(0.15, 0.15, 0.15),
+            mode=("bilinear", "nearest"),
+            padding_mode="zeros",
+            as_tensor_output=False
+        ),
         #RandGaussianNoised(
         #    keys=["image"],
         #    prob=0.5,
@@ -201,12 +201,12 @@ train_transforms = Compose(
          #   approx='erf'
             #allow_missing_keys=False
         #),
-        RandAdjustContrastd(
-            keys=["image"],
-            prob=0.5,
-            gamma=(0.9, 1.1)
+        #RandAdjustContrastd(
+        #    keys=["image"],
+        #    prob=0.5,
+        #    gamma=(0.9, 1.1)
           #allow_missing_keys=False
-        ),
+        #),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -316,7 +316,7 @@ model = UNet(
     strides=(2, 2, 2, 2),
     num_res_units=2,
     norm=Norm.BATCH,
-    dropout=0.2,
+    #dropout=0.2,
 ).to(device)
 loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4)
