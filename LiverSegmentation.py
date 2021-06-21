@@ -131,16 +131,16 @@ train_transforms = Compose(
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
 
-        #RandCropByPosNegLabeld(
-        #    keys=["image", "label"],
-        #    label_key="label",
-        #    spatial_size=(96, 96, 96),
-        #    pos=1,
-        #    neg=1,
-        #    num_samples=4,
-        #    image_key="image",
-        #    image_threshold=0,
-        #),
+        RandCropByPosNegLabeld(
+            keys=["image", "label"],
+            label_key="label",
+            spatial_size=(96, 96, 96),
+            pos=1,
+            neg=1,
+            num_samples=4,
+            image_key="image",
+            image_threshold=0,
+        ),
         #Rand3DElasticd(
         #    keys=["image", "label"],
         #    sigma_range=(0, 1),

@@ -166,20 +166,20 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        Rand3DElasticd(
-            keys=["image", "label"],
-            sigma_range=(0, 1),
-            magnitude_range=(0, 1),
-            spatial_size=None,
-            prob=0.5,
-            rotate_range=(-math.pi/36, math.pi/36), #-15, 15 / -5, 5
-            shear_range=None,
-            translate_range=None,
-            scale_range=(0.15, 0.15, 0.15),
-            mode=("bilinear", "nearest"),
-            padding_mode="zeros",
-            as_tensor_output=False
-        ),
+        #Rand3DElasticd(
+        #    keys=["image", "label"],
+        #    sigma_range=(0, 1),
+        #    magnitude_range=(0, 1),
+        #    spatial_size=None,
+        #    prob=0.5,
+        #    rotate_range=(-math.pi/36, math.pi/36), #-15, 15 / -5, 5
+        #    shear_range=None,
+        #    translate_range=None,
+        #    scale_range=(0.15, 0.15, 0.15),
+        #    mode=("bilinear", "nearest"),
+        #    padding_mode="zeros",
+        #    as_tensor_output=False
+        #),
         #RandGaussianNoised(
         #    keys=["image"],
         #    prob=0.5,
@@ -436,8 +436,8 @@ with torch.no_grad():
                        padding_mode = "zeros"
                       )
 
-    for i, train_inf_data in enumerate(train_inf_loader):
-        train_images = train_inf_data["image"].to(device)
+    for i, train_data in enumerate(train_inf_loader):
+        train_images = train_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
@@ -474,7 +474,7 @@ with torch.no_grad():
             both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(np.bool)
 
-        saver.save_batch(both_lungs, train_inf_data["image_meta_dict"])
+        saver.save_batch(both_lungs, train_data["image_meta_dict"])
 
 print("FINISH!!")
 
