@@ -181,13 +181,13 @@ train_transforms = Compose(
         #    padding_mode="zeros",
         #    as_tensor_output=False
         #),
-        #RandGaussianNoised(
-        #    keys=["image"],
-        #    prob=0.5,
-        #    mean=0.0,
-        #    std=0.1
+        RandGaussianNoised(
+            keys=["image"],
+            prob=0.5,
+            mean=0.0,
+            std=0.1
             #allow_missing_keys=False
-        #),
+        ),
         #RandScaleIntensityd(
         #    keys=["image"],
         #    factors=0.05, #this is 10%, try 5%
@@ -317,7 +317,7 @@ model = UNet(
     strides=(2, 2, 2, 2),
     num_res_units=2,
     norm=Norm.BATCH,
-    dropout=0.1,
+    #dropout=0.1,
 ).to(device)
 loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4)
