@@ -141,20 +141,20 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        #Rand3DElasticd(
-        #    keys=["image", "label"],
-        #    sigma_range=(0, 1),
-        #    magnitude_range=(0, 1),
-        #    spatial_size=None,
-        #    prob=0.1,
-        #    rotate_range=(-math.pi / 36, math.pi / 36),  # -15, 15 / -5, 5
-        #    shear_range=None,
-        #    translate_range=None,
-        #    scale_range=None,
-        #    mode=("bilinear", "nearest"),
-        #    padding_mode="zeros",
-        #    as_tensor_output=False
-        #),
+        Rand3DElasticd(
+            keys=["image", "label"],
+            sigma_range=(0, 1),
+            magnitude_range=(0, 1),
+            spatial_size=None,
+            prob=0.5,
+            rotate_range=(-math.pi / 36, math.pi / 36),  # -15, 15 / -5, 5
+            shear_range=None,
+            translate_range=None,
+            scale_range=None,
+            mode=("bilinear", "nearest"),
+            padding_mode="zeros",
+            as_tensor_output=False
+        ),
         #RandGaussianNoised(
         #    keys=["image"],
         #    prob=0.5,
@@ -162,11 +162,11 @@ train_transforms = Compose(
         #    std=0.1
          #allow_missing_keys=False
         #),
-       RandScaleIntensityd(
-           keys=["image"],
-           factors=0.05,  # this is 10%, try 5%
-           prob=0.5
-       ),
+       #RandScaleIntensityd(
+       #    keys=["image"],
+       #    factors=0.05,  # this is 10%, try 5%
+       #    prob=0.5
+       #),
        #RandGaussianSmoothd(
        #    keys=["image"],
        #    sigma_x=(0.25, 1.5),
@@ -178,7 +178,7 @@ train_transforms = Compose(
        #),
        #RandAdjustContrastd(
        #    keys=["image"],
-       #    prob=0.1,
+       #    prob=0.5,
         #   gamma=(0.9, 1.1)
        # allow_missing_keys=False
        #),
