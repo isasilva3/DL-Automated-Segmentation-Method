@@ -167,20 +167,20 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        #Rand3DElasticd(
-        #    keys=["image", "label"],
-        #    sigma_range=(0, 1),
-        #    magnitude_range=(0, 1),
-        #    spatial_size=None,
-        #    prob=0.5,
-        #    rotate_range=(-math.pi/36, math.pi/36), #-15, 15 / -5, 5
-        #    shear_range=None,
-        #    translate_range=None,
-        #    scale_range=(0.15, 0.15, 0.15),
-        #    mode=("bilinear", "nearest"),
-        #    padding_mode="zeros",
-        #    as_tensor_output=False
-        #),
+        Rand3DElasticd(
+            keys=["image", "label"],
+            sigma_range=(0, 1),
+            magnitude_range=(0, 1),
+            spatial_size=None,
+            prob=1,
+            #rotate_range=[0, (-math.pi/36, math.pi/36), 0], #-15, 15 / -5, 5
+            shear_range=None,
+            translate_range=None,
+            scale_range=(0.15, 0.15, 0.15),
+            mode=("bilinear", "nearest"),
+            padding_mode="zeros",
+            as_tensor_output=False
+        ),
         #RandGaussianNoised(
         #    keys=["image"],
         #    prob=0.5,
@@ -202,12 +202,12 @@ train_transforms = Compose(
         #    approx='erf'
             #allow_missing_keys=False
         #),
-        RandAdjustContrastd(
-            keys=["image"],
-            prob=0.5,
-            gamma=(0.9, 1.1)
+        #RandAdjustContrastd(
+        #    keys=["image"],
+        #    prob=0.5,
+        #    gamma=(0.9, 1.1)
           #allow_missing_keys=False
-        ),
+        #),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -324,7 +324,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 20
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -437,16 +437,16 @@ with torch.no_grad():
                        padding_mode = "zeros"
                       )
 
-    for i, test_data in enumerate(test_loader):
-        test_images = test_data["image"].to(device)
+    for i, train_data in enumerate(train_loader):
+        train_images = train_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs_1 = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model
+            train_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_2 = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model
+            train_images, roi_size, sw_batch_size, model
         )
 
         val_outputs_1 = val_outputs_1.argmax(dim=1, keepdim=True)
@@ -475,7 +475,7 @@ with torch.no_grad():
             both_lungs = both_lungs.cpu().clone().numpy()
             both_lungs = both_lungs.astype(np.bool)
 
-        saver.save_batch(both_lungs, test_data["image_meta_dict"])
+        saver.save_batch(both_lungs, train_data["image_meta_dict"])
 
 print("FINISH!!")
 
