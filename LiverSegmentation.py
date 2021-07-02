@@ -262,19 +262,19 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=2, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
 
 
 train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
-train_inf_loader = DataLoader(train_inf_ds, batch_size=2, num_workers=0)
+train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=0)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=2, num_workers=0)
+val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
 test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=2, num_workers=0)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -400,12 +400,12 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, test_data in enumerate(test_loader):
-        test_images = test_data["image"].to(device)
+    for i, val_data in enumerate(val_loader):
+        val_images = val_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model
+            val_images, roi_size, sw_batch_size, model
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         val_outputs = largest(val_outputs)
@@ -413,7 +413,7 @@ with torch.no_grad():
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
 
-        saver.save_batch(val_outputs, test_data["image_meta_dict"])
+        saver.save_batch(val_outputs, val_data["image_meta_dict"])
 
 
 
