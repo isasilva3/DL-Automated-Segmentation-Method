@@ -169,8 +169,8 @@ train_transforms = Compose(
         ),
         Rand3DElasticd(
             keys=["image", "label"],
-            sigma_range=(3, 10),
-            magnitude_range=(20, 50),
+            sigma_range=(5, 10),
+            magnitude_range=(70, 90),
             spatial_size=None,
             prob=0.5,
             rotate_range=(0, -math.pi/36, math.pi/36, 0), #-15, 15 / -5, 5
@@ -181,33 +181,33 @@ train_transforms = Compose(
             padding_mode="zeros",
             #as_tensor_output=False
         ),
-        #RandGaussianNoised(
-        #    keys=["image"],
-        #    prob=0.5,
-        #    mean=0.0,
-        #    std=0.1
+        RandGaussianNoised(
+            keys=["image"],
+            prob=0.5,
+            mean=0.0,
+            std=0.1
             #allow_missing_keys=False
-        #),
-        #RandScaleIntensityd(
-        #    keys=["image"],
-        #    factors=0.05, #this is 10%, try 5%
-        #    prob=0.5
-        #),
-        #RandGaussianSmoothd(
-        #    keys=["image"],
-        #    sigma_x=(0.25, 1.5),
-        #    sigma_y=(0.25, 1.5),
-        #    sigma_z=(0.25, 1.5),
-        #    prob=0.5,
-        #    approx='erf'
+        ),
+        RandScaleIntensityd(
+            keys=["image"],
+            factors=0.05, #this is 10%, try 5%
+            prob=0.5
+        ),
+        RandGaussianSmoothd(
+            keys=["image"],
+            sigma_x=(0.25, 1.5),
+            sigma_y=(0.25, 1.5),
+            sigma_z=(0.25, 1.5),
+            prob=0.5,
+            approx='erf'
             #allow_missing_keys=False
-        #),
-        #RandAdjustContrastd(
-        #    keys=["image"],
-        #    prob=0.5,
-        #    gamma=(0.9, 1.1)
-          #allow_missing_keys=False
-        #),
+        ),
+        RandAdjustContrastd(
+            keys=["image"],
+            prob=0.5,
+            gamma=(0.9, 1.1)
+            #allow_missing_keys=False
+        ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
