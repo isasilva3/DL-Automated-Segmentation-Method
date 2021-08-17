@@ -193,15 +193,15 @@ train_transforms = Compose(
             factors=0.05, #this is 10%, try 5%
             prob=0.5
         ),
-        RandGaussianSmoothd(
-            keys=["image"],
-            sigma_x=(0.25, 1.5),
-            sigma_y=(0.25, 1.5),
-            sigma_z=(0.25, 1.5),
-            prob=0.5,
-            approx='erf'
-            #allow_missing_keys=False
-        ),
+        # RandGaussianSmoothd(
+        #     keys=["image"],
+        #     sigma_x=(0.25, 1.5),
+        #     sigma_y=(0.25, 1.5),
+        #     sigma_z=(0.25, 1.5),
+        #     prob=0.5,
+        #     approx='erf'
+        #     #allow_missing_keys=False
+        # ),
         # RandAdjustContrastd(
         #     keys=["image"],
         #     prob=0.5,
