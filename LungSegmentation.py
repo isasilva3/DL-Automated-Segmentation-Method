@@ -167,20 +167,20 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        Rand3DElasticd(
-            keys=["image", "label"],
-            sigma_range=(5, 30),
-            magnitude_range=(70, 90),
-            spatial_size=None,
-            prob=0.5,
-            rotate_range=(0, -math.pi/36, math.pi/36, 0), #-15, 15 / -5, 5
-            shear_range=None,
-            translate_range=None,
-            scale_range=(0.15, 0.15, 0.15),
-            mode=("bilinear", "nearest"),
-            padding_mode="zeros",
-            #as_tensor_output=False
-        ),
+        # Rand3DElasticd(
+        #     keys=["image", "label"],
+        #     sigma_range=(5, 30),
+        #     magnitude_range=(70, 90),
+        #     spatial_size=None,
+        #     prob=0.5,
+        #     rotate_range=(0, -math.pi/36, math.pi/36, 0), #-15, 15 / -5, 5
+        #     shear_range=None,
+        #     translate_range=None,
+        #     scale_range=(0.15, 0.15, 0.15),
+        #     mode=("bilinear", "nearest"),
+        #     padding_mode="zeros",
+        #     #as_tensor_output=False
+        # ),
         # RandGaussianNoised(
         #     keys=["image"],
         #     prob=0.5,
