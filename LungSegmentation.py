@@ -188,11 +188,11 @@ train_transforms = Compose(
         #     std=0.1
         #     #allow_missing_keys=False
         # ),
-        RandScaleIntensityd(
-            keys=["image"],
-            factors=0.09, #this is 10%, try 5%
-            prob=0.5
-        ),
+        # RandScaleIntensityd(
+        #     keys=["image"],
+        #     factors=0.09, #this is 10%, try 5%
+        #     prob=0.5
+        # ),
         # RandGaussianSmoothd(
         #     keys=["image"],
         #     sigma_x=(0.25, 1.5),
@@ -202,12 +202,12 @@ train_transforms = Compose(
         #     approx='erf'
         #     #allow_missing_keys=False
         # ),
-        # RandAdjustContrastd(
-        #     keys=["image"],
-        #     prob=0.5,
-        #     gamma=(0.9, 1.1)
-        #   #allow_missing_keys=False
-        # ),
+        RandAdjustContrastd(
+            keys=["image"],
+            prob=0.5,
+            gamma=(0.3, 0.5)
+          #allow_missing_keys=False
+        ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
