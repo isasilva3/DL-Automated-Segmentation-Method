@@ -205,7 +205,7 @@ train_transforms = Compose(
         RandAdjustContrastd(
             keys=["image"],
             prob=0.5,
-            gamma=(0.3, 0.5)
+            gamma=(0.9, 1.1)
           #allow_missing_keys=False
         ),
         # user can also add other random transforms
