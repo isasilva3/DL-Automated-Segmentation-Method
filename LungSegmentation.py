@@ -167,27 +167,27 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        # Rand3DElasticd(
-        #     keys=["image", "label"],
-        #     sigma_range=(5, 30),
-        #     magnitude_range=(70, 90),
-        #     spatial_size=None,
-        #     prob=0.5,
-        #     rotate_range=(0, -math.pi/36, math.pi/36, 0), #-15, 15 / -5, 5
-        #     shear_range=None,
-        #     translate_range=None,
-        #     scale_range=(0.15, 0.15, 0.15),
-        #     mode=("bilinear", "nearest"),
-        #     padding_mode="zeros",
-        #     #as_tensor_output=False
-        # ),
-        # RandGaussianNoised(
-        #     keys=["image"],
-        #     prob=0.5,
-        #     mean=0.0,
-        #     std=0.03
-        #     #allow_missing_keys=False
-        # ),
+        Rand3DElasticd(
+            keys=["image", "label"],
+            sigma_range=(5, 30),
+            magnitude_range=(70, 90),
+            spatial_size=None,
+            prob=0.5,
+            rotate_range=(0, -math.pi/36, math.pi/36, 0), #-15, 15 / -5, 5
+            shear_range=None,
+            translate_range=None,
+            scale_range=(0.15, 0.15, 0.15),
+            mode=("bilinear", "nearest"),
+            padding_mode="zeros",
+            #as_tensor_output=False
+        ),
+        RandGaussianNoised(
+            keys=["image"],
+            prob=0.5,
+            mean=0.0,
+            std=0.03
+            #allow_missing_keys=False
+        ),
         # RandScaleIntensityd(
         #     keys=["image"],
         #     factors=0.09, #this is 10%, try 5%
@@ -202,12 +202,12 @@ train_transforms = Compose(
         #     approx='erf'
         #     #allow_missing_keys=False
         # ),
-        RandAdjustContrastd(
-            keys=["image"],
-            prob=0.5,
-            gamma=(0.3, 1.4)
-          #allow_missing_keys=False
-        ),
+        # RandAdjustContrastd(
+        #     keys=["image"],
+        #     prob=0.5,
+        #     gamma=(0.3, 1.4)
+        #   #allow_missing_keys=False
+        # ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
