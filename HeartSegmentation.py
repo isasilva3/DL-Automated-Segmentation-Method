@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-# Pancreas 3D segmentation with MONAI
+# Bladder 3D segmentation with MONAI
 
 This tutorial shows how to integrate MONAI into an existing PyTorch medical DL program.
 
@@ -15,7 +15,7 @@ And easily use below features:
 1. Sliding window inference method.
 1. Deterministic training for reproducibility.
 
-Target: Pancreas
+Target: Bladder
 Modality: CT
 Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
@@ -65,7 +65,7 @@ from monai.utils import first, set_determinism
 from numpy import math
 
 print_config()
-print("PANCREAS")
+print("HEART")
 
 """## Setup data directory
 
@@ -84,8 +84,8 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
 root_dir = "//home//imoreira//Data"
 #root_dir = "C:\\Users\\isasi\\Downloads"
-data_dir = os.path.join(root_dir, "Pancreas_Data")
-out_dir = os.path.join(root_dir, "Pancreas_Best_Model")
+data_dir = os.path.join(root_dir,"Heart_Data")
+out_dir = os.path.join(root_dir, "Heart_Best_Model")
 
 """## Set MSD Spleen dataset path"""
 
@@ -128,7 +128,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-151, a_max=67, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -196,7 +196,7 @@ train_inf_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-151, a_max=67, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
         ),
         ToTensord(keys=["image", "label"]),
     ]
@@ -208,7 +208,7 @@ val_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-151, a_max=67, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -221,7 +221,7 @@ test_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-151, a_max=67, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -380,20 +380,20 @@ y = metric_values
 plt.xlabel("epoch")
 plt.plot(x, y)
 plt.show()
-fig2.savefig('Pancreas_Plot.png')
+fig2.savefig('Heart_Plot.png')
 
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
 
-out_dir = "//home//imoreira//Data//Pancreas_Best_Model"
-#out_dir = "C:\\Users\\isasi\\Downloads\\Pancreas_Best_Model"
+out_dir = "//home//imoreira//Data//Heart_Best_Model"
+#out_dir = "C:\\Users\\isasi\\Downloads\\Heart_Best_Model"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
 with torch.no_grad():
-    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Pancreas_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Pancreas_Segs_Out',
-                       output_postfix="seg_pancreas",
+    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Heart_Segs_Out')
+    saver = NiftiSaver(output_dir='//home//imoreira//Heart_Segs_Out',
+                       output_postfix="seg_heart",
                        output_ext=".nii.gz",
                        mode="nearest",
                        padding_mode="zeros"
