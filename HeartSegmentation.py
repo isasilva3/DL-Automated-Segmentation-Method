@@ -84,7 +84,7 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
 root_dir = "//home//imoreira//Data"
 #root_dir = "C:\\Users\\isasi\\Downloads"
-data_dir = os.path.join(root_dir,"Heart_Data")
+data_dir = os.path.join(root_dir, "Heart_Data")
 out_dir = os.path.join(root_dir, "Heart_Best_Model")
 
 """## Set MSD Spleen dataset path"""
