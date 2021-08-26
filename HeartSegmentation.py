@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-# Bladder 3D segmentation with MONAI
+# Heart 3D segmentation with MONAI
 
 This tutorial shows how to integrate MONAI into an existing PyTorch medical DL program.
 
@@ -15,7 +15,7 @@ And easily use below features:
 1. Sliding window inference method.
 1. Deterministic training for reproducibility.
 
-Target: Bladder
+Target: Heart
 Modality: CT
 Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
