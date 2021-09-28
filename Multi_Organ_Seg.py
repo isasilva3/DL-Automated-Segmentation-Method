@@ -233,14 +233,14 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 #device = torch.device('cpu')
 model = UNet(
     dimensions=3,
-    in_channels=1,
+    in_channels=6,
     out_channels=6, #6 channels, 1 for each organ more background
     channels=(16, 32, 64, 128, 256),
     strides=(2, 2, 2, 2),
     num_res_units=2,
     norm=Norm.BATCH,
 ).to(device)
-loss_function = DiceLoss(to_onehot_y=False, softmax=False, sigmoid=True)
+loss_function = DiceLoss(to_onehot_y=True, softmax=False, sigmoid=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
@@ -251,8 +251,8 @@ best_metric = -1
 best_metric_epoch = -1
 epoch_loss_values = list()
 metric_values = list()
-post_pred = AsDiscrete(argmax=True, to_onehot=False, n_classes=2)
-post_label = AsDiscrete(to_onehot=False, n_classes=2)
+post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=2)
+post_label = AsDiscrete(to_onehot=True, n_classes=2)
 
 for epoch in range(epoch_num):
     print("-" * 10)
@@ -355,7 +355,7 @@ with torch.no_grad():
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model
         )
-        val_outputs = val_outputs.argmax(dim=None, keepdim=None)
+        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         #val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
