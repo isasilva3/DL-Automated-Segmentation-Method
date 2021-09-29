@@ -83,12 +83,12 @@ Label 5: Pancreas
 train_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
-        AddChanneld(keys=["image", "label"]),
-        AddChanneld(keys=["image", "label"]),
-        AddChanneld(keys=["image", "label"]),
-        AddChanneld(keys=["image", "label"]),
-        AddChanneld(keys=["image", "label"]),
-        AddChanneld(keys=["image", "label"]),
+        AddChanneld(keys=["label"]),
+        AddChanneld(keys=["label"]),
+        AddChanneld(keys=["label"]),
+        AddChanneld(keys=["label"]),
+        AddChanneld(keys=["label"]),
+        AddChanneld(keys=["label"]),
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
