@@ -83,7 +83,7 @@ Label 5: Pancreas
 train_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
-        AddChanneld(keys=["label"]),
+        AddChanneld(keys=["image", "label"]),
         AddChanneld(keys=["label"]),
         AddChanneld(keys=["label"]),
         AddChanneld(keys=["label"]),
