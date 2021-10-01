@@ -87,7 +87,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -167,7 +167,7 @@ val_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -180,7 +180,7 @@ test_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -292,7 +292,7 @@ for epoch in range(epoch_num):
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
-                largest = KeepLargestConnectedComponent(applied_labels=[1])
+                #largest = KeepLargestConnectedComponent(applied_labels=[1])
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
