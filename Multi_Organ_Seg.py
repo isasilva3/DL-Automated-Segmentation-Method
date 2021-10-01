@@ -296,7 +296,7 @@ for epoch in range(epoch_num):
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
-                    include_background=True,
+                    include_background=False,
                 )
                 metric_count += len(value)
                 metric_sum += value.sum().item()
