@@ -245,7 +245,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 300
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -356,6 +356,7 @@ with torch.no_grad():
             test_images, roi_size, sw_batch_size, model
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        val_outputs = val_outputs.squeeze(dim=0)
         #val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
