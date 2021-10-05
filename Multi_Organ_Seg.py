@@ -360,7 +360,7 @@ with torch.no_grad():
         #val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
-        val_outputs = val_outputs.astype(np.bool)
+        #val_outputs = val_outputs.astype(np.bool)
 
 
         saver.save_batch(val_outputs, test_data["image_meta_dict"])
