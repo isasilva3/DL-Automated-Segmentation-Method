@@ -399,7 +399,7 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, train_data in enumerate(train_loader):
+    for i, train_data in enumerate(train_inf_loader):
         train_images = train_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 4
