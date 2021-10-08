@@ -359,7 +359,7 @@ with torch.no_grad():
         val_outputs = val_outputs.squeeze(dim=0).cpu().data.numpy()
         #val_outputs = largest(val_outputs)
 
-        val_outputs = val_outputs.cpu().clone().numpy()
+        #val_outputs = val_outputs.cpu().clone().numpy()
         #val_outputs = val_outputs.astype(np.bool)
 
 
