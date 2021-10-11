@@ -206,24 +206,24 @@ plt.imshow(label[:, :, 80])
 #fig.savefig('my_figure.png')
 
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=2)
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=1)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=2)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=1)
 
 
 #train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
 #train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
 
-val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=2)
+val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=1)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=1, num_workers=2)
+val_loader = DataLoader(val_ds, batch_size=1, num_workers=1)
 
-test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=2)
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=1)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=1, num_workers=2)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=1)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -288,7 +288,7 @@ for epoch in range(epoch_num):
                     val_data["label"].to(device),
                 )
                 roi_size = (160, 160, 160)
-                sw_batch_size = 4
+                sw_batch_size = 1
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
@@ -335,7 +335,7 @@ fig2.savefig('Training_Plot.png')
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
-
+###
 out_dir = "//home//imoreira//Data//Best_Model"
 #out_dir = "C:\\Users\\isasi\\Downloads\\Bladder_Best_Model"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
@@ -351,12 +351,12 @@ with torch.no_grad():
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (160, 160, 160)
-        sw_batch_size = 4
+        sw_batch_size = 1
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        val_outputs = val_outputs.squeeze(dim=0).cpu().data.numpy()
+        val_outputs = val_outputs.squeeze(dim=0).cpu().clone().numpy()
         #val_outputs = largest(val_outputs)
 
         #val_outputs = val_outputs.cpu().clone().numpy()
