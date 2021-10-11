@@ -355,7 +355,7 @@ with torch.no_grad():
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model
         )
-        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        #val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         val_outputs = val_outputs.squeeze(dim=0).cpu().data.numpy()
         #val_outputs = largest(val_outputs)
 
