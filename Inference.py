@@ -1,8 +1,8 @@
 """## Check best model output with the input image and label"""
 import glob
 import os
-
 import torch
+import nibabel as nib
 
 from MONAI.monai.data import NiftiSaver, CacheDataset, DataLoader
 from MONAI.monai.inferers import sliding_window_inference
@@ -11,11 +11,14 @@ from MONAI.monai.networks.nets import UNet
 from MONAI.monai.transforms import LoadImage, AddChannel, Spacing, Orientation, ScaleIntensityRange, ToTensord, Compose
 
 
+
 root_dir = "//home//imoreira"
 data_dir = os.path.join(root_dir, "Data")
 out_dir= os.path.join(data_dir, "Best_Model")
 
 test_files = sorted(glob.glob(os.path.join(data_dir, "Test_Images", "*.nii.gz")))
+
+test_files = [test_files]
 
 test_transforms = Compose(
     [
