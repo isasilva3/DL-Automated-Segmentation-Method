@@ -18,12 +18,12 @@ out_dir= os.path.join(data_dir, "Best_Model")
 
 test_files = sorted(glob.glob(os.path.join(data_dir, "Test_Images", "*.nii.gz")))
 
-test_files = [test_files]
+#test_files = [test_files]
 
 test_transforms = Compose(
     [
         LoadImage(keys="image"),
-        AddChannel(),
+        #AddChannel(),
         Spacing(pixdim=(1.5, 1.5, 2.0), mode="bilinear"),
         Orientation(axcodes="RAS"),
         ScaleIntensityRange(
