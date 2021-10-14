@@ -8,33 +8,33 @@ from MONAI.monai.data import NiftiSaver, CacheDataset, DataLoader
 from MONAI.monai.inferers import sliding_window_inference
 from MONAI.monai.networks.layers import Norm
 from MONAI.monai.networks.nets import UNet
-from MONAI.monai.transforms import LoadImage, AddChannel, Spacing, Orientation, ScaleIntensityRange, ToTensord, Compose
-
-
+from MONAI.monai.transforms import LoadImage, AddChannel, Spacing, Orientation, ScaleIntensityRange, ToTensord, Compose, \
+    LoadImaged, AddChanneld, Spacingd, Orientationd, ScaleIntensityRanged
 
 root_dir = "//home//imoreira"
 data_dir = os.path.join(root_dir, "Data")
 out_dir= os.path.join(data_dir, "Best_Model")
 
-test_files = sorted(glob.glob(os.path.join(data_dir, "Test_Images", "*.nii.gz")))
-
-#test_files = [test_files]
+test_images = sorted(glob.glob(os.path.join(data_dir, "Test_Images", "*.nii.gz")))
+data_dicts = [
+    {"image": image}
+    for image in zip(test_images)]
 
 test_transforms = Compose(
     [
-        LoadImage(keys="image"),
-        #AddChannel(),
-        Spacing(pixdim=(1.5, 1.5, 2.0), mode="bilinear"),
-        Orientation(axcodes="RAS"),
-        ScaleIntensityRange(
-            a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+        LoadImaged(keys="image"),
+        AddChanneld(keys="image"),
+        Spacingd(keys="image", pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys="image", axcodes="RAS"),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
-        ToTensord(keys="image"),
+        ToTensord(keys=["image"]),
     ]
 )
 
-test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=1)
+test_ds = CacheDataset(data=test_images, transform=test_transforms, cache_rate=1.0, num_workers=1)
 #test_ds = Dataset(data=test_files)
 test_loader = DataLoader(test_ds, batch_size=1, num_workers=1)
 
