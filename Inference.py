@@ -16,21 +16,23 @@ data_dir = os.path.join(root_dir, "Data")
 out_dir= os.path.join(data_dir, "Best_Model")
 
 test_images = sorted(glob.glob(os.path.join(data_dir, "Test_Images", "*.nii.gz")))
+test_labels = sorted(glob.glob(os.path.join(data_dir, "Test_Labels", "*.nii.gz")))
 data_dicts = [
-    {"image": image}
-    for image in zip(test_images)]
+    {"image": image_name, "label": label_name}
+    for image_name, label_name in zip(test_images, test_labels)
+]
 
 test_transforms = Compose(
     [
-        LoadImaged(keys="image"),
-        AddChanneld(keys="image"),
-        Spacingd(keys="image", pixdim=(1.5, 1.5, 2.0), mode=("bilinear")),
-        Orientationd(keys="image", axcodes="RAS"),
+        LoadImaged(keys=["image", "label"]),
+        AddChanneld(keys=["image", "label"]),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
             keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
-        ToTensord(keys=["image"]),
+        ToTensord(keys=["image", "label"]),
     ]
 )
 
