@@ -68,7 +68,7 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, test_data in enumerate(test_loader):
+    for test_data in test_loader:
         test_images = test_data["image"].to(device)
         roi_size = (160, 160, 160)
         sw_batch_size = 1
