@@ -131,7 +131,7 @@ from monai.utils import first, set_determinism
 from numpy import math
 
 print_config()
-print("MULTI-ORGAN")
+print("INFERENCE")
 
 md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
@@ -349,8 +349,9 @@ with torch.no_grad():
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model
         )
-        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+       # val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         val_outputs = val_outputs.squeeze(dim=0).cpu().clone().numpy()
+        val_outputs = val_outputs.astype(np.bool)
         #val_outputs = largest(val_outputs)
 
         #val_outputs = val_outputs.cpu().clone().numpy()
@@ -358,3 +359,4 @@ with torch.no_grad():
 
 
         saver.save_batch(val_outputs, test_data["image_meta_dict"])
+
