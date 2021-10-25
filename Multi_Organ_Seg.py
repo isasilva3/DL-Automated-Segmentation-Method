@@ -356,7 +356,7 @@ with torch.no_grad():
             test_images, roi_size, sw_batch_size, model
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        val_outputs = val_outputs.squeeze(dim=0).cpu().numpy()
+        val_outputs = val_outputs.squeeze(dim=0).cpu().clone().numpy()
         #val_outputs = largest(val_outputs)
 
         #val_outputs = val_outputs.cpu().clone().numpy()
