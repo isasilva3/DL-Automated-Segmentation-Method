@@ -355,12 +355,12 @@ with torch.no_grad():
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model
         )
-        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        val_outputs = val_outputs.argmax(dim=1, keepdim=True).cpu().clone().numpy()
         val_outputs = val_outputs.squeeze(dim=0).cpu().clone().numpy()
         #val_outputs = largest(val_outputs)
 
         #val_outputs = val_outputs.cpu().clone().numpy()
-        #val_outputs = val_outputs.astype(np.bool)
+        val_outputs = val_outputs.astype(np.bool)
 
 
         saver.save_batch(val_outputs, test_data["image_meta_dict"])
