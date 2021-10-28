@@ -143,11 +143,17 @@ out_dir = os.path.join(data_dir, "Best_Model")
 """## Set dataset path"""
 
 train_images = sorted(glob.glob(os.path.join(data_dir, "Images", "*.nii.gz")))
-train_labels = sorted(glob.glob(os.path.join(data_dir, "Labels", "*.nii.gz")))
+# train_labels = sorted(glob.glob(os.path.join(data_dir, "Labels", "*.nii.gz")))
+# data_dicts = [
+#     {"image": image_name, "label": label_name}
+#     for image_name, label_name in zip(train_images, train_labels)
+# ]
+
 data_dicts = [
-    {"image": image_name, "label": label_name}
-    for image_name, label_name in zip(train_images, train_labels)
-]
+     {"image": image_name}
+     for image_name in train_images
+ ]
+
 #n = len(data_dicts)
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
 #train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[int(n*0.2):]
@@ -169,15 +175,15 @@ Label 5: Pancreas
 
 test_transforms = Compose(
     [
-        LoadImaged(keys=["image", "label"]),
-        AddChanneld(keys=["image", "label"]),
-        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        LoadImaged(keys="image"),
+        AddChanneld(keys="image"),
+        Spacingd(keys="image", pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys="image", axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+            keys="image", a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
-        ToTensord(keys=["image", "label"]),
+        ToTensord(keys="image"),
     ]
 )
 
@@ -217,18 +223,12 @@ with torch.no_grad():
     for test_data in test_loader:
         test_images = test_data["image"].to(device)
         roi_size = (160, 160, 160)
-        sw_batch_size = 1
+        sw_batch_size = 4
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model
         )
-        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        val_outputs = val_outputs.squeeze(dim=0).cpu().clone().numpy()
-        #val_outputs = val_outputs.astype(np.bool)
-        #val_outputs = largest(val_outputs)
-
-        #val_outputs = val_outputs.cpu().clone().numpy()
-        #val_outputs = val_outputs.astype(np.bool)
-
+        val_outputs = val_outputs.cpu().clone().numpy()
+        val_outputs = val_outputs.astype(np.int)
 
         saver.save_batch(val_outputs, test_data["image_meta_dict"])
 
