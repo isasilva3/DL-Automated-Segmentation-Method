@@ -360,7 +360,7 @@ with torch.no_grad():
         #val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
-        #val_outputs = int(val_outputs)
+        val_outputs = int(val_outputs)
 
         #val_outputs = torch.argmax(val_outputs, dim=1)
         #val_outputs = val_outputs.squeeze(dim=0).cpu().data.numpy()
