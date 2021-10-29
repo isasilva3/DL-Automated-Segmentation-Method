@@ -130,10 +130,10 @@ with torch.no_grad():
                        )
     for test_data in test_loader:
         test_images = test_data["image"].to(device)
-        roi_size = (160, 160, 160)
+        roi_size = (96, 96, 96)
         sw_batch_size = 4
         val_outputs = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model
+            test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         val_outputs = val_outputs.cpu().clone().numpy()
