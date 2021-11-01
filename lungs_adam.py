@@ -46,7 +46,7 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 root_dir = "//home//imoreira"
 #root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Data")
-out_dir = os.path.join(data_dir, "Best_Model")
+out_dir = os.path.join(data_dir, "Output")
 
 """## Set dataset path"""
 
@@ -66,7 +66,7 @@ data_dicts = [
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
 #train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[int(n*0.2):]
 
-val_files, train_files, test_files = data_dicts[0:8], data_dicts[8:40], data_dicts[40:50]
+val_files, train_files, test_files = data_dicts[0:9], data_dicts[9:43], data_dicts[43:53]
 
 
 """## Set deterministic training for reproducibility"""
