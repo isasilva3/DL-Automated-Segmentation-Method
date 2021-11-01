@@ -74,9 +74,9 @@ set_determinism(seed=0)
 
 '''
 Label 1: Bladder
-Label 2: Heart
-Label 3: Liver
-Label 4: Lungs
+Label 2: Liver
+Label 3: Lungs
+Label 4: Heart
 Label 5: Pancreas
 '''
 
@@ -240,7 +240,7 @@ model = UNet(
     num_res_units=2,
     norm=Norm.BATCH,
 ).to(device)
-loss_function = DiceLoss(to_onehot_y=True, softmax=False, sigmoid=True)
+loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
@@ -350,10 +350,10 @@ with torch.no_grad():
                        )
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
-        roi_size = (160, 160, 160)
+        roi_size = (96, 96, 96)
         sw_batch_size = 4
         val_outputs = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model
+            test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         #val_outputs = val_outputs.squeeze(dim=0).cpu().clone().numpy()

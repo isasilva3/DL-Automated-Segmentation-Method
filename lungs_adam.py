@@ -66,7 +66,7 @@ data_dicts = [
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
 #train_files, val_files = data_dicts[:int(n*0.8)], data_dicts[int(n*0.2):]
 
-val_files, train_files, test_files = data_dicts[0:9], data_dicts[9:43], data_dicts[43:53]
+test_files = data_dicts[0:52]
 
 
 """## Set deterministic training for reproducibility"""
@@ -75,9 +75,9 @@ set_determinism(seed=0)
 
 '''
 Label 1: Bladder
-Label 2: Heart
-Label 3: Liver
-Label 4: Lungs
+Label 2: Liver
+Label 3: Lungs
+Label 4: Heart
 Label 5: Pancreas
 '''
 
