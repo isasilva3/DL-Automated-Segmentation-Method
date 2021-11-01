@@ -277,6 +277,7 @@ for epoch in range(epoch_num):
     epoch_loss_values.append(epoch_loss)
     print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")
 
+
     if (epoch + 1) % val_interval == 0:
         model.eval()
         with torch.no_grad():
@@ -288,7 +289,7 @@ for epoch in range(epoch_num):
                     val_data["label"].to(device),
                 )
                 roi_size = (160, 160, 160)
-                sw_batch_size = 1
+                sw_batch_size = 4
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
@@ -298,8 +299,12 @@ for epoch in range(epoch_num):
                     y=val_labels,
                     include_background=False,
                 )
+                print("Value:", value)
                 metric_count += len(value)
+
                 metric_sum += value.sum().item()
+            print("Metric:", metric)
+            print("Metric count:", metric_count)
             metric = metric_sum / metric_count
             metric_values.append(metric)
             if metric > best_metric:
@@ -343,6 +348,7 @@ model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
     saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out',
+                    #output_dir='C:\\Users\\isasi\\Downloads\\Segs_Out',
                        output_postfix="seg",
                        output_ext=".nii.gz",
                        mode="nearest",
