@@ -303,7 +303,7 @@ for epoch in range(epoch_num):
                 metric_count += len(value[0])
 
                 metric_sum += value.sum().item()
-            print("Metric:", metric)
+            print("Metric:", metric_sum)
             print("Metric count:", metric_count)
             metric = metric_sum / metric_count
             metric_values.append(metric)
