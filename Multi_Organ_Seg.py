@@ -288,7 +288,7 @@ for epoch in range(epoch_num):
                     val_data["image"].to(device),
                     val_data["label"].to(device),
                 )
-                roi_size = (160, 160, 160)
+                roi_size = (96, 96, 96)
                 sw_batch_size = 4
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
