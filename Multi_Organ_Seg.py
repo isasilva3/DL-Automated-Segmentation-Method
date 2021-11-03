@@ -318,7 +318,7 @@ for epoch in range(epoch_num):
                 print("saved new best metric model")
             print(
                 f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
-                f"current epoch: {epoch + 1} current class mean dice: {metric_class:.4f}"
+                #f"current epoch: {epoch + 1} current class mean dice: {metric_class:.4f}"
                 f"\nbest mean dice: {best_metric:.4f} at epoch: {best_metric_epoch}"
 
             )
