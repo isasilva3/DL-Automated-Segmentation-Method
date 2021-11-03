@@ -241,17 +241,17 @@ model = UNet(
     norm=Norm.BATCH,
 ).to(device)
 loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-optimizer = torch.optim.Adam(model.parameters(), 1e-4)
+optimizer = torch.optim.Adam(model.parameters(), 1e-5)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 300
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
 epoch_loss_values = list()
 metric_values = list()
-metric_values_class = list()
+#metric_values_class = list()
 post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=6)
 post_label = AsDiscrete(to_onehot=True, n_classes=6)
 
@@ -284,8 +284,8 @@ for epoch in range(epoch_num):
         with torch.no_grad():
             metric_sum = 0.0
             metric_count = 0
-            metric_sum_class = 0.0
-            metric_count_class = 0
+            #metric_sum_class = 0.0
+            #metric_count_class = 0
             for val_data in val_loader:
                 val_inputs, val_labels = (
                     val_data["image"].to(device),
@@ -304,13 +304,13 @@ for epoch in range(epoch_num):
                 )
 
                 metric_count += len(value[0])
-                metric_count_class += len(value[1])
+                #metric_count_class += len(value[1])
                 metric_sum += value[0].sum().item()
-                metric_sum_class += value[1].sum().item()
+                #metric_sum_class += value[1].sum().item()
             metric = metric_sum / metric_count
-            metric_class = metric_sum_class / metric_count_class
+            #metric_class = metric_sum_class / metric_count_class
             metric_values.append(metric)
-            metric_values_class.append(metric_class)
+            #metric_values_class.append(metric_class)
             if metric > best_metric:
                 best_metric = metric
                 best_metric_epoch = epoch + 1
