@@ -251,6 +251,7 @@ best_metric = -1
 best_metric_epoch = -1
 epoch_loss_values = list()
 metric_values = list()
+metric_values_class = list()
 post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=6)
 post_label = AsDiscrete(to_onehot=True, n_classes=6)
 
@@ -283,6 +284,8 @@ for epoch in range(epoch_num):
         with torch.no_grad():
             metric_sum = 0.0
             metric_count = 0
+            metric_sum_class = 0.0
+            metric_count_class = 0
             for val_data in val_loader:
                 val_inputs, val_labels = (
                     val_data["image"].to(device),
@@ -299,14 +302,15 @@ for epoch in range(epoch_num):
                     y=val_labels,
                     include_background=False,
                 )
-                print("Value:", value)
-                metric_count += len(value[0])
 
-                metric_sum += value.sum().item()
-            print("Metric:", metric_sum)
-            print("Metric count:", metric_count)
+                metric_count += len(value[0])
+                metric_count_class += len(value[1])
+                metric_sum += value[0].sum().item()
+                metric_sum_class += value[1].sum().item()
             metric = metric_sum / metric_count
+            metric_class = metric_sum_class / metric_count_class
             metric_values.append(metric)
+            metric_values_class.append(metric_class)
             if metric > best_metric:
                 best_metric = metric
                 best_metric_epoch = epoch + 1
@@ -314,7 +318,9 @@ for epoch in range(epoch_num):
                 print("saved new best metric model")
             print(
                 f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
+                f"current epoch: {epoch + 1} current class mean dice: {metric_class:.4f}"
                 f"\nbest mean dice: {best_metric:.4f} at epoch: {best_metric_epoch}"
+
             )
 
 print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_epoch}")
