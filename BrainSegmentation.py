@@ -1,5 +1,26 @@
 # -*- coding: utf-8 -*-
+"""
+# Brain 3D segmentation with MONAI
 
+This tutorial shows how to integrate MONAI into an existing PyTorch medical DL program.
+
+And easily use below features:
+1. Transforms for dictionary format data.
+1. Load Nifti image with metadata.
+1. Add channel dim to the data if no channel dimension.
+1. Scale medical image intensity with expected range.
+1. Crop out a batch of balanced images based on positive / negative label ratio.
+1. Cache IO and transforms to accelerate training and validation.
+1. 3D UNet model, Dice loss function, Mean Dice metric for 3D segmentation task.
+1. Sliding window inference method.
+1. Deterministic training for reproducibility.
+
+Target: Brain
+Modality: CT
+Size: 10 3D volumes (8 Training + 2 Testing)
+Source: Catarina
+
+"""
 from MONAI.monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
     RandAdjustContrastd, RandFlipd
 
@@ -44,19 +65,32 @@ from monai.utils import first, set_determinism
 from numpy import math
 
 print_config()
-print("MULTI-ORGAN")
+print("BRAIN")
+
+"""## Setup data directory
+
+You can specify a directory with the `MONAI_DATA_DIRECTORY` environment variable.  
+This allows you to save results and reuse downloads.  
+If not specified a temporary directory will be used.
+"""
+
+"""## Download dataset
+
+Downloads and extracts the dataset.  
+The dataset comes from http://medicaldecathlon.com/.
+"""
 
 md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
-root_dir = "//home//imoreira"
+root_dir = "//home//imoreira//Data"
 #root_dir = "C:\\Users\\isasi\\Downloads"
-data_dir = os.path.join(root_dir, "Data")
-out_dir = os.path.join(data_dir, "Best_Model")
+data_dir = os.path.join(root_dir, "Brain_Data")
+out_dir = os.path.join(root_dir, "Brain_Best_Model")
 
-"""## Set dataset path"""
+"""## Set MSD Spleen dataset path"""
 
-train_images = sorted(glob.glob(os.path.join(data_dir, "Images", "*.nii.gz")))
-train_labels = sorted(glob.glob(os.path.join(data_dir, "Labels", "*.nii.gz")))
+train_images = sorted(glob.glob(os.path.join(data_dir, "imagesTr", "*.nii.gz")))
+train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
 data_dicts = [
     {"image": image_name, "label": label_name}
     for image_name, label_name in zip(train_images, train_labels)
@@ -72,13 +106,20 @@ val_files, train_files, test_files = data_dicts[0:8], data_dicts[8:40], data_dic
 
 set_determinism(seed=0)
 
-'''
-Label 1: Bladder
-Label 2: Liver
-Label 3: Lungs
-Label 4: Heart
-Label 5: Pancreas
-'''
+"""## Setup transforms for training and validation
+
+Here we use several transforms to augment the dataset:
+1. `LoadImaged` loads the spleen CT images and labels from NIfTI format files.
+1. `AddChanneld` as the original data doesn't have channel dim, add 1 dim to construct "channel first" shape.
+1. `Spacingd` adjusts the spacing by `pixdim=(1.5, 1.5, 2.)` based on the affine matrix.
+1. `Orientationd` unifies the data orientation based on the affine matrix.
+1. `ScaleIntensityRanged` extracts intensity range [-57, 164] and scales to [0, 1].
+1. `CropForegroundd` removes all zero borders to focus on the valid body area of the images and labels.
+1. `RandCropByPosNegLabeld` randomly crop patch samples from big image based on pos / neg ratio.  
+The image centers of negative samples must be in valid body area.
+1. `RandAffined` efficiently performs `rotate`, `scale`, `shear`, `translate`, etc. together based on PyTorch affine transform.
+1. `ToTensord` converts the numpy array to PyTorch Tensor for further steps.
+"""
 
 train_transforms = Compose(
     [
@@ -87,7 +128,7 @@ train_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-40, a_max=80, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         RandCropByPosNegLabeld(
@@ -100,7 +141,7 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        #Rand3DElasticd(
+        # Rand3DElasticd(
         #    keys=["image", "label"],
         #    sigma_range=(0, 1),
         #    magnitude_range=(0, 1),
@@ -112,15 +153,15 @@ train_transforms = Compose(
         #    scale_range=None,
         #    mode=("bilinear", "nearest"),
         #    padding_mode="zeros",
-        #   as_tensor_output=False
-        #),
-        #RandGaussianNoised(
+        #    #as_tensor_output=False
+        # ),
+        # RandGaussianNoised(
         #    keys=["image"],
         #    prob=0.5,
-        #   mean=0.0,
+        #    mean=0.0,
         #    std=0.1
-         #allow_missing_keys=False
-        #),
+        #  #allow_missing_keys=False
+        # ),
        #RandScaleIntensityd(
        #    keys=["image"],
        #    factors=0.05,  # this is 10%, try 5%
@@ -135,12 +176,12 @@ train_transforms = Compose(
        #   approx='erf'
             # allow_missing_keys=False
        #),
-       #RandAdjustContrastd(
+       # RandAdjustContrastd(
        #    keys=["image"],
        #    prob=0.5,
        #    gamma=(0.9, 1.1)
-           #allow_missing_keys=False
-       #),
+       #    #allow_missing_keys=False
+       # ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -148,18 +189,18 @@ train_transforms = Compose(
        ToTensord(keys=["image", "label"]),
     ]
 )
-#train_inf_transforms = Compose(
-#    [
-#        LoadImaged(keys=["image", "label"]),
-#        AddChanneld(keys=["image", "label"]),
-#        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-#        Orientationd(keys=["image", "label"], axcodes="RAS"),
-#        ScaleIntensityRanged(
-#            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
-#        ),
-#        ToTensord(keys=["image", "label"]),
-#    ]
-#)
+train_inf_transforms = Compose(
+    [
+        LoadImaged(keys=["image", "label"]),
+        AddChanneld(keys=["image", "label"]),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-40, a_max=80, b_min=0.0, b_max=1.0, clip=True,
+        ),
+        ToTensord(keys=["image", "label"]),
+    ]
+)
 val_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
@@ -167,7 +208,7 @@ val_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-40, a_max=80, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -180,7 +221,7 @@ test_transforms = Compose(
         Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         ScaleIntensityRanged(
-            keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+            keys=["image"], a_min=-40, a_max=80, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys=["image", "label"]),
@@ -206,24 +247,33 @@ plt.imshow(label[:, :, 80])
 #fig.savefig('my_figure.png')
 
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
+"""## Define CacheDataset and DataLoader for training and validation
+
+Here we use CacheDataset to accelerate training and validation process, it's 10x faster than the regular Dataset.  
+To achieve best performance, set `cache_rate=1.0` to cache all the data, if memory is not enough, set lower value.  
+Users can also set `cache_num` instead of `cache_rate`, will use the minimum value of the 2 settings.  
+And set `num_workers` to enable multi-threads during caching.  
+If want to to try the regular Dataset, just change to use the commented code below.
+"""
+
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=1)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=1)
 
 
-#train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
-#train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
+train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=1)
+train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=1)
 
-val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
+val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=1)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
+val_loader = DataLoader(val_ds, batch_size=1, num_workers=1)
 
-test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=1)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=1)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -234,7 +284,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
-    out_channels=6, #6 channels, 1 for each organ more background
+    out_channels=2,
     channels=(16, 32, 64, 128, 256),
     strides=(2, 2, 2, 2),
     num_res_units=2,
@@ -245,15 +295,14 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 300
+epoch_num = 200
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
 epoch_loss_values = list()
 metric_values = list()
-#metric_values_class = list()
-post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=6)
-post_label = AsDiscrete(to_onehot=True, n_classes=6)
+post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=2)
+post_label = AsDiscrete(to_onehot=True, n_classes=2)
 
 for epoch in range(epoch_num):
     print("-" * 10)
@@ -278,39 +327,31 @@ for epoch in range(epoch_num):
     epoch_loss_values.append(epoch_loss)
     print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")
 
-
     if (epoch + 1) % val_interval == 0:
         model.eval()
         with torch.no_grad():
             metric_sum = 0.0
             metric_count = 0
-            #metric_sum_class = 0.0
-            #metric_count_class = 0
             for val_data in val_loader:
                 val_inputs, val_labels = (
                     val_data["image"].to(device),
                     val_data["label"].to(device),
                 )
-                roi_size = (96, 96, 96)
+                roi_size = (160, 160, 160)
                 sw_batch_size = 4
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
-                #largest = KeepLargestConnectedComponent(applied_labels=[1])
+                largest = KeepLargestConnectedComponent(applied_labels=[1])
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
                     include_background=False,
                 )
-
-                metric_count += len(value[0])
-                #metric_count_class += len(value[1])
-                metric_sum += value[0].sum().item()
-                #metric_sum_class += value[1].sum().item()
+                metric_count += len(value)
+                metric_sum += value.sum().item()
             metric = metric_sum / metric_count
-            #metric_class = metric_sum_class / metric_count_class
             metric_values.append(metric)
-            #metric_values_class.append(metric_class)
             if metric > best_metric:
                 best_metric = metric
                 best_metric_epoch = epoch + 1
@@ -318,9 +359,7 @@ for epoch in range(epoch_num):
                 print("saved new best metric model")
             print(
                 f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
-                #f"current epoch: {epoch + 1} current class mean dice: {metric_class:.4f}"
                 f"\nbest mean dice: {best_metric:.4f} at epoch: {best_metric_epoch}"
-
             )
 
 print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_epoch}")
@@ -341,40 +380,36 @@ y = metric_values
 plt.xlabel("epoch")
 plt.plot(x, y)
 plt.show()
-fig2.savefig('Training_Plot.png')
+fig2.savefig('Brain_Plot.png')
 
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
-###
-out_dir = "//home//imoreira//Data//Best_Model"
-#out_dir = "C:\\Users\\isasi\\Downloads\\Bladder_Best_Model"
+
+out_dir = "//home//imoreira//Data//Brain_Best_Model"
+#out_dir = "C:\\Users\\isasi\\Downloads\\Brain_Best_Model"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
 with torch.no_grad():
-    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out',
-                    #output_dir='C:\\Users\\isasi\\Downloads\\Segs_Out',
-                       output_postfix="seg",
+    #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Brain_Segs_Out')
+    saver = NiftiSaver(output_dir='//home//imoreira//Brain_Segs_Out',
+                       output_postfix="seg_brain",
                        output_ext=".nii.gz",
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, test_data in enumerate(test_loader):
-        test_images = test_data["image"].to(device)
-        roi_size = (96, 96, 96)
+    for i, train_data in enumerate(train_inf_loader):
+        train_images = train_data["image"].to(device)
+        roi_size = (160, 160, 160)
         sw_batch_size = 4
         val_outputs = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model, overlap=0.8
+            train_images, roi_size, sw_batch_size, model
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        #val_outputs = val_outputs.squeeze(dim=0).cpu().clone().numpy()
-        #val_outputs = largest(val_outputs)
+        val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
-        val_outputs = val_outputs.astype(np.int)
+        val_outputs = val_outputs.astype(np.bool)
 
-        #val_outputs = torch.argmax(val_outputs, dim=1)
-        #val_outputs = val_outputs.squeeze(dim=0).cpu().data.numpy()
 
-        saver.save_batch(val_outputs, test_data["image_meta_dict"])
+        saver.save_batch(val_outputs, train_data["image_meta_dict"])
