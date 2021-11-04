@@ -42,6 +42,7 @@ from monai.transforms import (
 )
 from monai.utils import first, set_determinism
 from numpy import math
+from scipy.interpolate import make_interp_spline, BSpline
 
 print_config()
 print("MULTI-ORGAN")
@@ -331,6 +332,9 @@ fig2=plt.figure("train", (12, 6))
 plt.subplot(1, 2, 1)
 plt.title("Epoch Average Loss")
 x = [i + 1 for i in range(len(epoch_loss_values))]
+
+x_new = np.linspace(x.min(), x.max(), 200) #
+
 y = epoch_loss_values
 plt.xlabel("epoch")
 plt.plot(x, y)
@@ -338,8 +342,13 @@ plt.subplot(1, 2, 2)
 plt.title("Val Mean Dice")
 x = [val_interval * (i + 1) for i in range(len(metric_values))]
 y = metric_values
+
+spl = make_interp_spline(x, y, k=7) #
+
+y_smooth = spl(x_new) #
+
 plt.xlabel("epoch")
-plt.plot(x, y)
+plt.plot(x_new, y_smooth) #
 plt.show()
 fig2.savefig('Training_Plot.png')
 
