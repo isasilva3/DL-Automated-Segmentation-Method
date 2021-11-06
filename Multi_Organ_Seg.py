@@ -253,8 +253,8 @@ best_metric_epoch = -1
 epoch_loss_values = list()
 metric_values = list()
 #metric_values_class = list()
-post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=6)
-post_label = AsDiscrete(to_onehot=True, n_classes=6)
+post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=7)
+post_label = AsDiscrete(to_onehot=True, n_classes=7)
 
 for epoch in range(epoch_num):
     print("-" * 10)
