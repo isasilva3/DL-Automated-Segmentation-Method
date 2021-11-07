@@ -333,7 +333,7 @@ plt.subplot(1, 2, 1)
 plt.title("Epoch Average Loss")
 x = [i + 1 for i in range(len(epoch_loss_values))]
 
-x_new = np.linspace(0, 10, 1) #
+x_new = np.linspace(0, 600, 1) #
 
 y = epoch_loss_values
 plt.xlabel("epoch")
