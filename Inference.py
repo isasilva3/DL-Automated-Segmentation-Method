@@ -75,9 +75,9 @@ set_determinism(seed=0)
 
 '''
 Label 1: Bladder
-Label 2: Heart
-Label 3: Liver
-Label 4: Lungs
+Label 2: Liver
+Label 3: Lungs
+Label 4: Heart
 Label 5: Pancreas
 '''
 
@@ -107,7 +107,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
-    out_channels=6, #6 channels, 1 for each organ more background
+    out_channels=7, #6 channels, 1 for each organ more background
     channels=(16, 32, 64, 128, 256),
     strides=(2, 2, 2, 2),
     num_res_units=2,
