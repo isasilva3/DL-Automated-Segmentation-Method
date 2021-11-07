@@ -246,7 +246,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 600
+epoch_num = 10
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -333,7 +333,7 @@ plt.subplot(1, 2, 1)
 plt.title("Epoch Average Loss")
 x = [i + 1 for i in range(len(epoch_loss_values))]
 
-x_new = np.linspace(x.min(), x.max(), 200) #
+x_new = np.linspace(0, 700, 200) #
 
 y = epoch_loss_values
 plt.xlabel("epoch")
