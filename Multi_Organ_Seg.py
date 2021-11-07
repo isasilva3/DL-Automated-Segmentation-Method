@@ -242,11 +242,11 @@ model = UNet(
     norm=Norm.BATCH,
 ).to(device)
 loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-optimizer = torch.optim.Adam(model.parameters(), 1e-4)
+optimizer = torch.optim.Adam(model.parameters(), 1e-5)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 10
+epoch_num = 600
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -343,7 +343,7 @@ plt.title("Val Mean Dice")
 x = [val_interval * (i + 1) for i in range(len(metric_values))]
 y = metric_values
 
-spl = make_interp_spline(x, y, k=3) #
+spl = make_interp_spline(x, y, k=7) #
 
 y_smooth = spl(x_new) #
 
