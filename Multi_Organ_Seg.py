@@ -337,7 +337,7 @@ x = [i + 1 for i in range(len(epoch_loss_values))]
 y = epoch_loss_values
 #spl = make_interp_spline(x, y, k=7) #
 #y_smooth = spl(x_new) #
-model=make_interp_spline(x, y)
+model_s=make_interp_spline(x, y)
 xs=np.linspace(1, 10, 500)
 ys=model(xs)
 
