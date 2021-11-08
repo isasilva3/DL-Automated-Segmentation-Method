@@ -42,7 +42,7 @@ from monai.transforms import (
 )
 from monai.utils import first, set_determinism
 from numpy import math
-from scipy.interpolate import make_interp_spline, BSpline
+from scipy.interpolate import make_interp_spline
 
 print_config()
 print("MULTI-ORGAN")
@@ -331,22 +331,30 @@ print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_
 fig2=plt.figure("train", (12, 6))
 plt.subplot(1, 2, 1)
 plt.title("Epoch Average Loss")
+
 x = [i + 1 for i in range(len(epoch_loss_values))]
-x_new = np.linspace(0, 10, 1) #
+#x_new = np.linspace(0, 10, 1) #
 y = epoch_loss_values
-spl = make_interp_spline(x, y, k=7) #
-y_smooth = spl(x_new) #
+#spl = make_interp_spline(x, y, k=7) #
+#y_smooth = spl(x_new) #
+model=make_interp_spline(x, y)
+xs=np.linspace(1, 10, 500)
+ys=model(xs)
+
 plt.xlabel("epoch")
-plt.plot(x_new, y_smooth)
+plt.plot(xs, ys)
 plt.subplot(1, 2, 2)
 plt.title("Val Mean Dice")
 x = [val_interval * (i + 1) for i in range(len(metric_values))]
 y = metric_values
-x_new_ = np.linspace(0, 10, 1) #
-spl = make_interp_spline(x, y, k=7) #
-y_smooth = spl(x_new_) #
+#x_new_ = np.linspace(0, 10, 1) #
+#spl = make_interp_spline(x, y, k=7) #
+#y_smooth = spl(x_new_) #
+model=make_interp_spline(x, y)
+xs=np.linspace(1, 10, 500)
+ys=model(xs)
 plt.xlabel("epoch")
-plt.plot(x_new, y_smooth) #
+plt.plot(xs, ys) #
 plt.show()
 fig2.savefig('Training_Plot.png')
 
