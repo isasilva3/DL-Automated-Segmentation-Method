@@ -334,7 +334,7 @@ plt.title("Epoch Average Loss")
 x = [i + 1 for i in range(len(epoch_loss_values))]
 x_new = np.linspace(0, 10, 1) #
 y = epoch_loss_values
-spl = make_interp_spline(x, y, k=5) #
+spl = make_interp_spline(x, y, k=7) #
 y_smooth = spl(x_new) #
 plt.xlabel("epoch")
 plt.plot(x_new, y_smooth)
@@ -342,9 +342,9 @@ plt.subplot(1, 2, 2)
 plt.title("Val Mean Dice")
 x = [val_interval * (i + 1) for i in range(len(metric_values))]
 y = metric_values
-x_new = np.linspace(0, 10, 1) #
-spl = make_interp_spline(x, y, k=5) #
-y_smooth = spl(x_new) #
+x_new_ = np.linspace(0, 10, 1) #
+spl = make_interp_spline(x, y, k=7) #
+y_smooth = spl(x_new_) #
 plt.xlabel("epoch")
 plt.plot(x_new, y_smooth) #
 plt.show()
