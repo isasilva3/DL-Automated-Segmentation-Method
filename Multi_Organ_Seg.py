@@ -246,7 +246,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-5)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 5
+epoch_num = 3
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -332,7 +332,7 @@ fig2=plt.figure("train", (12, 6))
 plt.subplot(1, 2, 1)
 plt.title("Epoch Average Loss")
 x = [i + 1 for i in range(len(epoch_loss_values))]
-x_new = np.linspace(0, 600, 1) #
+x_new = np.linspace(0, 3, 1) #
 y = epoch_loss_values
 spl = make_interp_spline(x, y, k=10) #
 y_smooth = spl(x_new) #
@@ -342,7 +342,7 @@ plt.subplot(1, 2, 2)
 plt.title("Val Mean Dice")
 x = [val_interval * (i + 1) for i in range(len(metric_values))]
 y = metric_values
-x_new = np.linspace(0, 600, 1) #
+x_new = np.linspace(0, 3, 1) #
 spl = make_interp_spline(x, y, k=10) #
 y_smooth = spl(x_new) #
 plt.xlabel("epoch")
