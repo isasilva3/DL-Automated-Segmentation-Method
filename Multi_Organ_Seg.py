@@ -339,7 +339,7 @@ y = epoch_loss_values
 #y_smooth = spl(x_new) #
 model_s=make_interp_spline(x, y)
 xs=np.linspace(1, 10, 500)
-ys=model(xs)
+ys=model_s(xs)
 
 plt.xlabel("epoch")
 plt.plot(xs, ys)
@@ -350,11 +350,11 @@ y = metric_values
 #x_new_ = np.linspace(0, 10, 1) #
 #spl = make_interp_spline(x, y, k=7) #
 #y_smooth = spl(x_new_) #
-model=make_interp_spline(x, y)
-xs=np.linspace(1, 10, 500)
-ys=model(xs)
+model_ss=make_interp_spline(x, y)
+xss=np.linspace(1, 10, 500)
+yss=model_ss(xss)
 plt.xlabel("epoch")
-plt.plot(xs, ys) #
+plt.plot(xss, yss) #
 plt.show()
 fig2.savefig('Training_Plot.png')
 
