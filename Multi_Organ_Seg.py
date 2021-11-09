@@ -242,11 +242,11 @@ model = UNet(
     norm=Norm.BATCH,
 ).to(device)
 loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-optimizer = torch.optim.Adam(model.parameters(), 1e-5)
+optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 10
+epoch_num = 600
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -338,7 +338,7 @@ y = epoch_loss_values
 #spl = make_interp_spline(x, y, k=7) #
 #y_smooth = spl(x_new) #
 model_s=make_interp_spline(x, y)
-xs=np.linspace(1, 10, 500)
+xs=np.linspace(1, 600, 500)
 ys=model_s(xs)
 
 plt.xlabel("epoch")
@@ -351,7 +351,7 @@ y = metric_values
 #spl = make_interp_spline(x, y, k=7) #
 #y_smooth = spl(x_new_) #
 model_ss=make_interp_spline(x, y)
-xss=np.linspace(1, 10, 500)
+xss=np.linspace(1, 600, 500)
 yss=model_ss(xss)
 plt.xlabel("epoch")
 plt.plot(xss, yss) #
