@@ -43,6 +43,7 @@ from monai.transforms import (
 from monai.utils import first, set_determinism
 from numpy import math
 from scipy.interpolate import make_interp_spline
+from torch.utils.tensorboard import SummaryWriter
 
 print_config()
 print("MULTI-ORGAN")
@@ -351,7 +352,7 @@ y = metric_values
 #spl = make_interp_spline(x, y, k=7) #
 #y_smooth = spl(x_new_) #
 model_ss=make_interp_spline(x, y)
-xss=np.linspace(1, 600, 500)
+xss=np.linspace(1, 600, 600)
 yss=model_ss(xss)
 plt.xlabel("epoch")
 plt.plot(xss, yss) #
