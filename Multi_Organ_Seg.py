@@ -54,6 +54,9 @@ root_dir = "//home//imoreira"
 #root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Data")
 out_dir = os.path.join(data_dir, "Best_Model")
+tensorboard_dir = "//home//imoreira//Data//Tensorboard"
+
+writer = SummaryWriter(log_dir=tensorboard_dir) ##
 
 """## Set dataset path"""
 
@@ -244,6 +247,7 @@ model = UNet(
 ).to(device)
 loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max') ##
 
 """## Execute a typical PyTorch training process"""
 
@@ -260,6 +264,7 @@ post_label = AsDiscrete(to_onehot=True, n_classes=7)
 for epoch in range(epoch_num):
     print("-" * 10)
     print(f"epoch {epoch + 1}/{epoch_num}")
+    print('Current learning rate:', optimizer.param_groups[0]['lr']) ##
     model.train()
     epoch_loss = 0
     step = 0
@@ -276,6 +281,8 @@ for epoch in range(epoch_num):
         optimizer.step()
         epoch_loss += loss.item()
         print(f"{step}/{len(train_ds) // train_loader.batch_size}, train_loss: {loss.item():.4f}")
+        epoch_len = len(train_ds) // train_loader.batch_size ##
+        writer.add_scalar("train_loss", loss.item(), epoch_len * epoch + step) ##
     epoch_loss /= step
     epoch_loss_values.append(epoch_loss)
     print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")
@@ -313,6 +320,8 @@ for epoch in range(epoch_num):
             #metric_class = metric_sum_class / metric_count_class
             metric_values.append(metric)
             #metric_values_class.append(metric_class)
+            scheduler.step(metric) ##
+            writer.add_scalar("val_mean_dice", metric, epoch + 1) ##
             if metric > best_metric:
                 best_metric = metric
                 best_metric_epoch = epoch + 1
