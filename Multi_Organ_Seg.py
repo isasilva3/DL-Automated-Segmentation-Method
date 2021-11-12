@@ -195,7 +195,7 @@ test_transforms = Compose(
 """## Check transforms in DataLoader"""
 
 check_ds = Dataset(data=val_files, transform=val_transforms)
-check_loader = DataLoader(check_ds, batch_size=1)
+check_loader = DataLoader(check_ds, batch_size=2)
 check_data = first(check_loader)
 image, label = (check_data["image"][0][0], check_data["label"][0][0])
 print(f"image shape: {image.shape}, label shape: {label.shape}")
@@ -216,7 +216,7 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=2, shuffle=True, num_workers=0)
 
 
 #train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
@@ -224,11 +224,11 @@ train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=0)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=4, num_workers=0)
+val_loader = DataLoader(val_ds, batch_size=2, num_workers=0)
 
 test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=4, num_workers=0)
+test_loader = DataLoader(test_ds, batch_size=2, num_workers=0)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -301,7 +301,7 @@ for epoch in range(epoch_num):
                     val_data["label"].to(device),
                 )
                 roi_size = (96, 96, 96)
-                sw_batch_size = 4
+                sw_batch_size = 2
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
@@ -388,7 +388,7 @@ with torch.no_grad():
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
-        sw_batch_size = 4
+        sw_batch_size = 2
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
