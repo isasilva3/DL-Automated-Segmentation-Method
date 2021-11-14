@@ -211,24 +211,24 @@ print(f"image shape: {image.shape}, label shape: {label.shape}")
 # #fig.savefig('my_figure.png')
 
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=1)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1)
 
 
 #train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
 #train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
 
-val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
+val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=1)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
+val_loader = DataLoader(val_ds, batch_size=4, num_workers=0)
 
-test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=1)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
+test_loader = DataLoader(test_ds, batch_size=4, num_workers=1)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -261,6 +261,8 @@ metric_values = list()
 post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=7)
 post_label = AsDiscrete(to_onehot=True, n_classes=7)
 
+classes_names = ['bladder', 'brain', 'liver', 'lungs', 'pancreas']
+
 for epoch in range(epoch_num):
     print("-" * 10)
     print(f"epoch {epoch + 1}/{epoch_num}")
@@ -290,11 +292,11 @@ for epoch in range(epoch_num):
 
     if (epoch + 1) % val_interval == 0:
         model.eval()
+        number_class = 6
         with torch.no_grad():
             metric_sum = 0.0
             metric_count = 0
-            #metric_sum_class = 0.0
-            #metric_count_class = 0
+            dice_metric_val = np.zeros(number_class)
             for val_data in val_loader:
                 val_inputs, val_labels = (
                     val_data["image"].to(device),
@@ -313,15 +315,18 @@ for epoch in range(epoch_num):
                 )
 
                 metric_count += len(value[0])
-                #metric_count_class += len(value[1])
                 metric_sum += value[0].sum().item()
-                #metric_sum_class += value[1].sum().item()
+                dice_metric_val += value[0].cpu().numpy()
             metric = metric_sum / metric_count
-            #metric_class = metric_sum_class / metric_count_class
             metric_values.append(metric)
-            #metric_values_class.append(metric_class)
             scheduler.step(metric) ##
             writer.add_scalar("val_mean_dice", metric, epoch + 1) ##
+            writer.add_scalar("Learning rate", optimizer.param_groups[0]['lr'], epoch + 1)
+
+            for number_of_class in range(6):
+                dice_name = 'Validate/Dice class: ' + classes_names[number_of_class]
+                writer.add_scalar(dice_name, (dice_metric_val[number_of_class] / len(val_loader)), epoch + 1)
+
             if metric > best_metric:
                 best_metric = metric
                 best_metric_epoch = epoch + 1
