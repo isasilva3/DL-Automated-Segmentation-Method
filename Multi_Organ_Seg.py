@@ -261,7 +261,7 @@ metric_values = list()
 post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=7)
 post_label = AsDiscrete(to_onehot=True, n_classes=7)
 
-classes_names = ['bladder', 'brain', 'liver', 'lungs', 'pancreas']
+classes_names = ['bladder', 'brain', 'liver', 'lungs', 'heart', 'pancreas']
 
 for epoch in range(epoch_num):
     print("-" * 10)
