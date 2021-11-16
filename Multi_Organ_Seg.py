@@ -22,7 +22,7 @@ from monai.utils import set_determinism, GridSampleMode, GridSamplePadMode
 from monai.networks.nets import SegResNet
 from monai.data.nifti_saver import NiftiSaver
 from monai.inferers import sliding_window_inference
-from monai.losses import DiceLoss
+from monai.losses import DiceLoss, DiceCELoss
 from monai.metrics import compute_meandice
 from monai.networks.layers import Norm
 from monai.networks.nets import UNet
@@ -245,7 +245,11 @@ model = UNet(
     num_res_units=2,
     norm=Norm.BATCH,
 ).to(device)
-loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+
+#loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+
+
 optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max') ##
 
