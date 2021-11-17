@@ -247,11 +247,11 @@ model = UNet(
 ).to(device)
 
 #loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True)
+loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 
 
-optimizer = torch.optim.Adam(model.parameters(), 1e-4)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max') ##
+optimizer = torch.optim.Adam(model.parameters(), 1e-3)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
 
 """## Execute a typical PyTorch training process"""
 
