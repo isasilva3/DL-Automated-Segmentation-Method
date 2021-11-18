@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from MONAI.monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
-    RandAdjustContrastd, RandFlipd
+#from MONAI.monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
+#    RandAdjustContrastd, RandFlipd
 
 """## Setup imports"""
 
