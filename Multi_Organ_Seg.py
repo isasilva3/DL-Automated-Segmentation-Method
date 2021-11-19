@@ -246,8 +246,8 @@ model = UNet(
     norm=Norm.BATCH,
 ).to(device)
 
-#loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-loss_function = DiceCELoss(include_background=False, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+#loss_function = DiceCELoss(include_background=False, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 
 
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
@@ -317,7 +317,8 @@ for epoch in range(epoch_num):
                     y=val_labels,
                     include_background=False,
                 )
-
+                print('y_pred', val_outputs)
+                print('y', val_labels)
                 metric_count += len(value[0])
                 metric_sum += value[0].sum().item()
                 dice_metric_val += value[0].cpu().numpy()
