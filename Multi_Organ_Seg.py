@@ -251,7 +251,7 @@ loss_function = DiceLoss(include_background=False, to_onehot_y=True, softmax=Tru
 
 
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max') ##
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
 
 """## Execute a typical PyTorch training process"""
 
@@ -312,13 +312,13 @@ for epoch in range(epoch_num):
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
                 #largest = KeepLargestConnectedComponent(applied_labels=[1])
+                print('y_pred', val_outputs.size())
+                print('y', val_labels.size())
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
                     include_background=False,
                 )
-                print('y_pred', val_outputs)
-                print('y', val_labels)
                 metric_count += len(value[0])
                 metric_sum += value[0].sum().item()
                 dice_metric_val += value[0].cpu().numpy()
