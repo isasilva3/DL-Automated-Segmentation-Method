@@ -251,7 +251,7 @@ loss_function = DiceLoss(include_background=False, to_onehot_y=True, softmax=Tru
 
 
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max') ##
 
 """## Execute a typical PyTorch training process"""
 
