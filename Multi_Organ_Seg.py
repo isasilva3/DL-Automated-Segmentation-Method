@@ -246,7 +246,7 @@ model = UNet(
     norm=Norm.BATCH,
 ).to(device)
 
-loss_function = DiceLoss(include_background=False, to_onehot_y=True, softmax=True)
+loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 #loss_function = DiceCELoss(include_background=False, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 
 
