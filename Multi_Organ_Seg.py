@@ -211,24 +211,24 @@ print(f"image shape: {image.shape}, label shape: {label.shape}")
 # #fig.savefig('my_figure.png')
 
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=1)
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
 
 
 #train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
 #train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
 
-val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=1)
+val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
 val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
-test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=1)
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=1, num_workers=1)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -250,7 +250,7 @@ loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 #loss_function = DiceCELoss(include_background=False, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 
 
-optimizer = torch.optim.Adam(model.parameters(), 1e-3)
+optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max') ##
 
 """## Execute a typical PyTorch training process"""
