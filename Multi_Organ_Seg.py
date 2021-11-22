@@ -307,7 +307,7 @@ for epoch in range(epoch_num):
                     val_data["label"].to(device),
                 )
                 roi_size = (96, 96, 96)
-                sw_batch_size = 4
+                sw_batch_size = 2
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
@@ -398,7 +398,7 @@ with torch.no_grad():
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
-        sw_batch_size = 4
+        sw_batch_size = 2
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
