@@ -308,12 +308,15 @@ for epoch in range(epoch_num):
                 )
                 roi_size = (96, 96, 96)
                 sw_batch_size = 2
+                print('val_labels: ', val_labels.size())
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
+                print('val_outputs_pre_proc: ', val_outputs.size())
                 val_outputs = post_pred(val_outputs)
+
                 val_labels = post_label(val_labels)
                 #largest = KeepLargestConnectedComponent(applied_labels=[1])
-                print('y_pred', val_outputs.size())
-                print('y', val_labels.size())
+                print('val_outputs_post_proc: ', val_outputs.size())
+                print('val_labels_post_proc: ', val_labels.size())
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
@@ -399,6 +402,7 @@ with torch.no_grad():
         test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 2
+
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
