@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-#from MONAI.monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
-#    RandAdjustContrastd, RandFlipd
+from monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
+    RandAdjustContrastd, RandFlipd
 
 """## Setup imports"""
 
@@ -251,7 +251,7 @@ loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 
 
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max') ##
 
 """## Execute a typical PyTorch training process"""
 
@@ -307,12 +307,11 @@ for epoch in range(epoch_num):
                     val_data["label"].to(device),
                 )
                 roi_size = (96, 96, 96)
-                sw_batch_size = 2
+                sw_batch_size = 1
                 print('val_labels: ', val_labels.size())
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 print('val_outputs_pre_proc: ', val_outputs.size())
                 val_outputs = post_pred(val_outputs)
-
                 val_labels = post_label(val_labels)
                 #largest = KeepLargestConnectedComponent(applied_labels=[1])
                 print('val_outputs_post_proc: ', val_outputs.size())
@@ -401,7 +400,7 @@ with torch.no_grad():
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
-        sw_batch_size = 2
+        sw_batch_size = 1
 
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model, overlap=0.8
