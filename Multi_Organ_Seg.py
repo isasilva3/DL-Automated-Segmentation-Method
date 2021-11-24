@@ -17,13 +17,13 @@ import torch
 
 from monai.apps import download_and_extract
 from monai.config import print_config
-from monai.data import CacheDataset, DataLoader, Dataset
+from monai.data import CacheDataset, DataLoader, Dataset, decollate_batch
 from monai.utils import set_determinism, GridSampleMode, GridSamplePadMode
 from monai.networks.nets import SegResNet
 from monai.data.nifti_saver import NiftiSaver
 from monai.inferers import sliding_window_inference
 from monai.losses import DiceLoss, DiceCELoss
-from monai.metrics import compute_meandice
+from monai.metrics import compute_meandice, DiceMetric
 from monai.networks.layers import Norm
 from monai.networks.nets import UNet
 from monai.transforms import (
@@ -211,12 +211,12 @@ print(f"image shape: {image.shape}, label shape: {label.shape}")
 # #fig.savefig('my_figure.png')
 
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=2)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=0)
 
 
 #train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
@@ -224,7 +224,7 @@ train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
+val_loader = DataLoader(val_ds, batch_size=2, num_workers=0)
 
 test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
@@ -246,12 +246,12 @@ model = UNet(
     norm=Norm.BATCH,
 ).to(device)
 
+
 loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 #loss_function = DiceCELoss(include_background=False, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
-
-
-optimizer = torch.optim.Adam(model.parameters(), 1e-4)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max') ##
+optimizer = torch.optim.Adam(model.parameters(), 1e-3)
+dice_metric = DiceMetric(include_background=False, reduction="mean")
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
 
 """## Execute a typical PyTorch training process"""
 
@@ -307,25 +307,36 @@ for epoch in range(epoch_num):
                     val_data["label"].to(device),
                 )
                 roi_size = (96, 96, 96)
-                sw_batch_size = 1
+                sw_batch_size = 4
                 print('val_labels: ', val_labels.size())
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 print('val_outputs_pre_proc: ', val_outputs.size())
-                val_outputs = post_pred(val_outputs)
-                val_labels = post_label(val_labels)
+                #val_outputs = post_pred(val_outputs)
+                #val_labels = post_label(val_labels)
+                val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
+                val_labels = [post_label(i) for i in decollate_batch(val_labels)]
                 #largest = KeepLargestConnectedComponent(applied_labels=[1])
                 print('val_outputs_post_proc: ', val_outputs.size())
                 print('val_labels_post_proc: ', val_labels.size())
-                value = compute_meandice(
-                    y_pred=val_outputs,
-                    y=val_labels,
-                    include_background=False,
-                )
-                metric_count += len(value[0])
-                metric_sum += value[0].sum().item()
-                dice_metric_val += value[0].cpu().numpy()
-            metric = metric_sum / metric_count
+                # value = compute_meandice(
+                #     y_pred=val_outputs,
+                #     y=val_labels,
+                #     #include_background=True,
+                # )
+                dice_metric(y_pred=val_outputs, y=val_labels)
+            #     metric_count += len(value[0])
+            #     metric_sum += value[0].sum().item()
+            #     dice_metric_val += value[0].cpu().numpy()
+            # metric = metric_sum / metric_count
+            # metric_values.append(metric)
+
+            # aggregate the final mean dice result
+            metric = dice_metric.aggregate().item()
+            # reset the status for next validation round
+            dice_metric.reset()
+
             metric_values.append(metric)
+
             scheduler.step(metric) ##
             writer.add_scalar("val_mean_dice", metric, epoch + 1) ##
             writer.add_scalar("Learning rate", optimizer.param_groups[0]['lr'], epoch + 1)
@@ -339,14 +350,17 @@ for epoch in range(epoch_num):
                 best_metric_epoch = epoch + 1
                 torch.save(model.state_dict(), os.path.join(out_dir, "best_metric_model.pth"))
                 print("saved new best metric model")
+
             print(
                 f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
                 #f"current epoch: {epoch + 1} current class mean dice: {metric_class:.4f}"
-                f"\nbest mean dice: {best_metric:.4f} at epoch: {best_metric_epoch}"
-
+                f"\nbest mean dice: {best_metric:.4f} "
+                f"at epoch: {best_metric_epoch}"
             )
 
-print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_epoch}")
+print(
+    f"train completed, best_metric: {best_metric:.4f} "
+    f"at epoch: {best_metric_epoch}")
 
 """## Plot the loss and metric"""
 
@@ -400,7 +414,7 @@ with torch.no_grad():
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
-        sw_batch_size = 1
+        sw_batch_size = 4
 
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model, overlap=0.8
