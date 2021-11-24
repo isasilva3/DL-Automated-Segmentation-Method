@@ -316,8 +316,8 @@ for epoch in range(epoch_num):
                 val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
                 val_labels = [post_label(i) for i in decollate_batch(val_labels)]
                 #largest = KeepLargestConnectedComponent(applied_labels=[1])
-                print('val_outputs_post_proc: ', val_outputs.size())
-                print('val_labels_post_proc: ', val_labels.size())
+                # print('val_outputs_post_proc: ', val_outputs.size())
+                # print('val_labels_post_proc: ', val_labels.size())
                 # value = compute_meandice(
                 #     y_pred=val_outputs,
                 #     y=val_labels,
