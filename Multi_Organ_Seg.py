@@ -247,8 +247,8 @@ model = UNet(
 ).to(device)
 
 
-loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-#loss_function = DiceCELoss(include_background=False, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+#loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+loss_function = DiceCELoss(to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
@@ -318,17 +318,17 @@ for epoch in range(epoch_num):
                 #largest = KeepLargestConnectedComponent(applied_labels=[1])
                 # print('val_outputs_post_proc: ', val_outputs.size())
                 # print('val_labels_post_proc: ', val_labels.size())
-                # value = compute_meandice(
-                #     y_pred=val_outputs,
-                #     y=val_labels,
-                #     #include_background=True,
-                # )
-                dice_metric(y_pred=val_outputs, y=val_labels)
-            #     metric_count += len(value[0])
-            #     metric_sum += value[0].sum().item()
-            #     dice_metric_val += value[0].cpu().numpy()
-            # metric = metric_sum / metric_count
-            # metric_values.append(metric)
+                # # value = compute_meandice(
+                # #      y_pred=val_outputs,
+                # #      y=val_labels,
+                # #     #include_background=True,
+                #  )
+                value = dice_metric(y_pred=val_outputs, y=val_labels)
+                metric_count += len(value[0])
+                metric_sum += value[0].sum().item()
+                dice_metric_val += value[0].cpu().numpy()
+            metric = metric_sum / metric_count
+            metric_values.append(metric)
 
             # aggregate the final mean dice result
             metric = dice_metric.aggregate().item()
