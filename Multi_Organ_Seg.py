@@ -248,7 +248,7 @@ model = UNet(
 
 
 #loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-loss_function = DiceCELoss(to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
@@ -308,9 +308,9 @@ for epoch in range(epoch_num):
                 )
                 roi_size = (96, 96, 96)
                 sw_batch_size = 4
-                print('val_labels: ', val_labels.size())
+                #print('val_labels: ', val_labels.size())
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
-                print('val_outputs_pre_proc: ', val_outputs.size())
+                #print('val_outputs_pre_proc: ', val_outputs.size())
                 #val_outputs = post_pred(val_outputs)
                 #val_labels = post_label(val_labels)
                 val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
@@ -405,7 +405,7 @@ model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
     saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out',
-                    #output_dir='C:\\Users\\isasi\\Downloads\\Segs_Out',
+                       #output_dir='C:\\Users\\isasi\\Downloads\\Segs_Out',
                        output_postfix="seg",
                        output_ext=".nii.gz",
                        mode="nearest",
