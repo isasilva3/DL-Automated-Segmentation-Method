@@ -247,7 +247,7 @@ model = UNet(
 ).to(device)
 
 
-loss_function = DiceLoss(include_background=True, to_onehot_y=True, softmax=True)
+loss_function = DiceLoss(include_background=False, to_onehot_y=True, softmax=True)
 #loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
