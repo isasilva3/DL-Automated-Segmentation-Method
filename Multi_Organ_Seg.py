@@ -105,27 +105,27 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        # Rand3DElasticd(
-        #    keys=["image", "label"],
-        #    sigma_range=(0, 1),
-        #    magnitude_range=(0, 1),
-        #    spatial_size=None,
-        #    prob=0.5,
-        #    rotate_range=(-math.pi / 36, math.pi / 36),  # -15, 15 / -5, 5
-        #    shear_range=None,
-        #    translate_range=None,
-        #    scale_range=None,
-        #    mode=("bilinear", "nearest"),
-        #    padding_mode="zeros",
-        #   as_tensor_output=False
-        # ),
-        # RandGaussianNoised(
-        #    keys=["image"],
-        #    prob=0.5,
-        #    mean=0.0,
-        #    std=0.1
-        #  #allow_missing_keys=False
-        # ),
+        Rand3DElasticd(
+           keys=["image", "label"],
+           sigma_range=(0, 1),
+           magnitude_range=(0, 1),
+           spatial_size=None,
+           prob=0.5,
+           rotate_range=(-math.pi / 36, math.pi / 36),  # -15, 15 / -5, 5
+           shear_range=None,
+           translate_range=None,
+           scale_range=None,
+           mode=("bilinear", "nearest"),
+           padding_mode="zeros",
+          as_tensor_output=False
+        ),
+        RandGaussianNoised(
+           keys=["image"],
+           prob=0.5,
+           mean=0.0,
+           std=0.1
+         #allow_missing_keys=False
+        ),
        #RandScaleIntensityd(
        #    keys=["image"],
        #    factors=0.05,  # this is 10%, try 5%
@@ -140,12 +140,12 @@ train_transforms = Compose(
        #   approx='erf'
             # allow_missing_keys=False
        #),
-       # RandAdjustContrastd(
-       #    keys=["image"],
-       #    prob=0.5,
-       #    gamma=(0.9, 1.1)
+       RandAdjustContrastd(
+          keys=["image"],
+          prob=0.5,
+          gamma=(0.9, 1.1)
         #allow_missing_keys=False
-       # ),
+       ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -247,8 +247,8 @@ model = UNet(
 ).to(device)
 
 
-#loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+loss_function = DiceLoss(include_background=True, to_onehot_y=True, softmax=True)
+#loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
@@ -404,7 +404,7 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out',
+    saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out//2',
                        #output_dir='C:\\Users\\isasi\\Downloads\\Segs_Out',
                        output_postfix="seg",
                        output_ext=".nii.gz",
