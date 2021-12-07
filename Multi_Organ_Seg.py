@@ -404,7 +404,7 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out//2',
+    saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out//3',
                        #output_dir='C:\\Users\\isasi\\Downloads\\Segs_Out',
                        output_postfix="seg",
                        output_ext=".nii.gz",
