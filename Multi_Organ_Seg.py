@@ -247,7 +247,7 @@ model = UNet(
 ).to(device)
 
 
-loss_function = DiceLoss(include_background=True, to_onehot_y=True, softmax=True)
+loss_function = DiceLoss(include_background=False, to_onehot_y=True, softmax=True)
 #loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
@@ -404,7 +404,7 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out//4',
+    saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out',
                        #output_dir='C:\\Users\\isasi\\Downloads\\Segs_Out',
                        output_postfix="seg",
                        output_ext=".nii.gz",
