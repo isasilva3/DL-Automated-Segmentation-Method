@@ -305,7 +305,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 100
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -352,7 +352,6 @@ for epoch in range(epoch_num):
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
-                print(val_outputs.size())
                 #val_outputs = post_pred(val_outputs)
                 #val_labels = post_label(val_labels)
                 largest = KeepLargestConnectedComponent(applied_labels=[1])
@@ -361,7 +360,6 @@ for epoch in range(epoch_num):
                 #    y=val_labels,
                 #    include_background=False,
                 #)
-                print(val_outputs.size())
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
@@ -412,10 +410,14 @@ print(
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
 
+
+print(val_outputs.size())
+
 out_dir = "//home//imoreira//Data//Pancreas_Best_Model"
 #out_dir = "C:\\Users\\isasi\\Downloads\\Pancreas_Best_Model"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
+
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Pancreas_Segs_Out')
     saver = NiftiSaver(output_dir='//home//imoreira//Pancreas_Segs_Out',
@@ -424,6 +426,7 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
+    print(val_outputs.size())
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
