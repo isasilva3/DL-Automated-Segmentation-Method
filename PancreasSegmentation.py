@@ -305,7 +305,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 100
+epoch_num = 200
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -411,8 +411,6 @@ print(
 """## Makes the Inferences """
 
 
-print(val_outputs.size())
-
 out_dir = "//home//imoreira//Data//Pancreas_Best_Model"
 #out_dir = "C:\\Users\\isasi\\Downloads\\Pancreas_Best_Model"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
@@ -426,16 +424,21 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    print(val_outputs.size())
+    val_outputs = np.squeeze(val_outputs, axis=0)
+
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 4
+
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
+
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        print(val_outputs.size())
+
+
+
         val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
