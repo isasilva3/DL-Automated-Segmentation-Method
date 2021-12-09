@@ -352,6 +352,7 @@ for epoch in range(epoch_num):
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
                 val_outputs = post_pred(val_outputs)
                 val_labels = post_label(val_labels)
+                print(val_outputs.size())
                 #val_outputs = post_pred(val_outputs)
                 #val_labels = post_label(val_labels)
                 largest = KeepLargestConnectedComponent(applied_labels=[1])
@@ -360,6 +361,7 @@ for epoch in range(epoch_num):
                 #    y=val_labels,
                 #    include_background=False,
                 #)
+                print(val_outputs.size())
                 value = compute_meandice(
                     y_pred=val_outputs,
                     y=val_labels,
