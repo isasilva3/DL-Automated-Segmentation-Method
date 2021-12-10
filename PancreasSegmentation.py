@@ -424,7 +424,8 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    val_outputs = np.squeeze(val_outputs, axis=0)
+
+
 
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
@@ -434,6 +435,10 @@ with torch.no_grad():
         val_outputs = sliding_window_inference(
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
+
+        val_outputs = np.squeeze(val_outputs)
+
+        val_outputs = torch.tensor(val_outputs)
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
 
