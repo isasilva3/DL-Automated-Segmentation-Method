@@ -17,8 +17,8 @@ from monai.utils import set_determinism, GridSampleMode, GridSamplePadMode
 from monai.networks.nets import SegResNet
 from monai.data.nifti_saver import NiftiSaver
 from monai.inferers import sliding_window_inference
-from monai.losses import DiceLoss
-from monai.metrics import compute_meandice
+from monai.losses import DiceLoss, DiceCELoss
+from monai.metrics import compute_meandice, DiceMetric
 from monai.networks.layers import Norm
 from monai.networks.nets import UNet
 from monai.transforms import (
@@ -46,7 +46,7 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 root_dir = "//home//imoreira"
 #root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Data")
-out_dir = os.path.join(data_dir, "Best_Model")
+out_dir = os.path.join(data_dir, "Pancreas_Best_Model")
 
 """## Set dataset path"""
 
@@ -88,7 +88,7 @@ test_transforms = Compose(
         Spacingd(keys="image", pixdim=(1.5, 1.5, 2.0), mode="bilinear"),
         Orientationd(keys="image", axcodes="RAS"),
         ScaleIntensityRanged(
-            keys="image", a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+            keys="image", a_min=-151, a_max=67, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys="image"),
@@ -113,8 +113,15 @@ model = UNet(
     num_res_units=2,
     norm=Norm.BATCH,
 ).to(device)
-loss_function = DiceLoss(to_onehot_y=True, softmax=False, sigmoid=True)
-optimizer = torch.optim.Adam(model.parameters(), 1e-4)
+# loss_function = DiceLoss(to_onehot_y=True, softmax=False, sigmoid=True)
+# optimizer = torch.optim.Adam(model.parameters(), 1e-4)
+
+loss_function = DiceCELoss(to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+optimizer = torch.optim.Adam(model.parameters(), 1e-3)
+dice_metric = DiceMetric(include_background=False, reduction="mean")
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
+
+largest = KeepLargestConnectedComponent(applied_labels=[1])
 
 """## Makes the Inferences """
 
@@ -122,7 +129,7 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Segs_Out',
+    saver = NiftiSaver(output_dir='//home//imoreira//Pancreas_Segs_Out',
                        output_postfix="seg",
                        output_ext=".nii.gz",
                        mode="nearest",
@@ -136,6 +143,7 @@ with torch.no_grad():
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        val_outputs = largest(val_outputs)
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.int)
 
