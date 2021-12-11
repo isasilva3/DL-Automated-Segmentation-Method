@@ -436,9 +436,9 @@ with torch.no_grad():
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
 
-        val_outputs = np.squeeze(val_outputs, axis=0)
+        #val_outputs = np.squeeze(val_outputs, axis=0)
 
-        val_outputs = torch.tensor(val_outputs)
+        #val_outputs = torch.tensor(val_outputs)
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
 
