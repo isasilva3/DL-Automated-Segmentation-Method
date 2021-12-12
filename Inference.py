@@ -121,7 +121,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
 
-largest = KeepLargestConnectedComponent(applied_labels=[1], connectivity=1)
+largest = KeepLargestConnectedComponent(applied_labels=[1])
 
 """## Makes the Inferences """
 
@@ -143,8 +143,7 @@ with torch.no_grad():
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
 
-        val_outputs = np.squeeze(val_outputs, axis=0)
-        val_outputs = torch.tensor(val_outputs)
+        val_outputs = torch.squeeze(val_outputs, dim=0)
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         val_outputs = largest(val_outputs)
