@@ -146,7 +146,7 @@ with torch.no_grad():
         val_outputs = np.squeeze(val_outputs, axis=0)
         val_outputs = torch.tensor(val_outputs)
 
-        #val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+        val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         val_outputs = largest(val_outputs)
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
