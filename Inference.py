@@ -121,7 +121,7 @@ optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
 
-largest = KeepLargestConnectedComponent(applied_labels=[1])
+largest = KeepLargestConnectedComponent(applied_labels=[1], connectivity=1)
 
 """## Makes the Inferences """
 
