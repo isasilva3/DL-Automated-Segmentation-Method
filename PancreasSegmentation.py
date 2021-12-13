@@ -266,11 +266,11 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=2)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=2)
 
 
-train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
-train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
+#train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
+#train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=2)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
@@ -278,7 +278,7 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=2)
 
 test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=2)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=1, num_workers=2)
+test_loader = DataLoader(test_ds, batch_size=4, num_workers=2)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -305,7 +305,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 300
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -436,9 +436,7 @@ with torch.no_grad():
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
 
-        #val_outputs = np.squeeze(val_outputs, axis=0)
-
-        #val_outputs = torch.tensor(val_outputs)
+        val_outputs = torch.squeeze(val_outputs, dim=1)
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
 
