@@ -21,8 +21,8 @@ Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
 
 """
-#from MONAI.monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
-#    RandAdjustContrastd, RandFlipd
+from monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
+    RandAdjustContrastd, RandFlipd
 
 """## Setup imports"""
 
