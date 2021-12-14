@@ -425,8 +425,6 @@ with torch.no_grad():
                        padding_mode="zeros"
                        )
 
-
-
     for i, test_data in enumerate(test_loader):
         test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
@@ -436,13 +434,11 @@ with torch.no_grad():
             test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
 
-        val_outputs = torch.squeeze(val_outputs, dim=1)
+        #val_outputs = torch.squeeze(val_outputs, dim=1)
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
 
-
-
-        val_outputs = largest(val_outputs)
+        #val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
