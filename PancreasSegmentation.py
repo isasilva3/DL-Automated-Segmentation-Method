@@ -146,27 +146,27 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        Rand3DElasticd(
-           keys=["image", "label"],
-           sigma_range=(0, 1),
-           magnitude_range=(0, 1),
-           spatial_size=None,
-           prob=0.5,
-           rotate_range=(-math.pi / 36, math.pi / 36),  # -15, 15 / -5, 5
-           shear_range=None,
-           translate_range=None,
-           scale_range=None,
-           mode=("bilinear", "nearest"),
-           padding_mode="zeros",
-           #as_tensor_output=False
-        ),
-        RandGaussianNoised(
-           keys=["image"],
-           prob=0.5,
-           mean=0.0,
-           std=0.1
-         #allow_missing_keys=False
-        ),
+        # Rand3DElasticd(
+        #    keys=["image", "label"],
+        #    sigma_range=(0, 1),
+        #    magnitude_range=(0, 1),
+        #    spatial_size=None,
+        #    prob=0.5,
+        #    rotate_range=(-math.pi / 36, math.pi / 36),  # -15, 15 / -5, 5
+        #    shear_range=None,
+        #    translate_range=None,
+        #    scale_range=None,
+        #    mode=("bilinear", "nearest"),
+        #    padding_mode="zeros",
+        #    #as_tensor_output=False
+        # ),
+        # RandGaussianNoised(
+        #    keys=["image"],
+        #    prob=0.5,
+        #    mean=0.0,
+        #    std=0.1
+        #  #allow_missing_keys=False
+        # ),
        #RandScaleIntensityd(
        #    keys=["image"],
        #    factors=0.05,  # this is 10%, try 5%
@@ -181,12 +181,12 @@ train_transforms = Compose(
        #   approx='erf'
             # allow_missing_keys=False
        #),
-       RandAdjustContrastd(
-          keys=["image"],
-          prob=0.5,
-          gamma=(0.9, 1.1)
-          #allow_missing_keys=False
-       ),
+       # RandAdjustContrastd(
+       #    keys=["image"],
+       #    prob=0.5,
+       #    gamma=(0.9, 1.1)
+       #    #allow_missing_keys=False
+       # ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -261,24 +261,24 @@ And set `num_workers` to enable multi-threads during caching.
 If want to to try the regular Dataset, just change to use the commented code below.
 """
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=2)
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=2)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
 
 
 #train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
 #train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
 
-val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=2)
+val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=1, num_workers=2)
+val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
-test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=2)
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=4, num_workers=2)
+test_loader = DataLoader(test_ds, batch_size=4, num_workers=0)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -295,10 +295,10 @@ model = UNet(
     num_res_units=2,
     norm=Norm.BATCH,
 ).to(device)
-loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+#loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 #optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
-#loss_function = DiceCELoss(to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+loss_function = DiceCELoss(to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
