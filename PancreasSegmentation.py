@@ -295,10 +295,10 @@ model = UNet(
     num_res_units=2,
     norm=Norm.BATCH,
 ).to(device)
-#loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 #optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
-loss_function = DiceCELoss(to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+#loss_function = DiceCELoss(to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
@@ -333,6 +333,8 @@ for epoch in range(epoch_num):
         optimizer.step()
         epoch_loss += loss.item()
         print(f"{step}/{len(train_ds) // train_loader.batch_size}, train_loss: {loss.item():.4f}")
+        epoch_len = len(train_ds) // train_loader.batch_size  ##
+        writer.add_scalar("train_loss", loss.item(), epoch_len * epoch + step)  ##
     epoch_loss /= step
     epoch_loss_values.append(epoch_loss)
     print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")
@@ -350,24 +352,25 @@ for epoch in range(epoch_num):
                 roi_size = (96, 96, 96)
                 sw_batch_size = 4
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
-                val_outputs = post_pred(val_outputs)
-                val_labels = post_label(val_labels)
                 #val_outputs = post_pred(val_outputs)
                 #val_labels = post_label(val_labels)
+                val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
+                val_labels = [post_label(i) for i in decollate_batch(val_labels)]
                 largest = KeepLargestConnectedComponent(applied_labels=[1])
                 #value = compute_meandice(
                 #    y_pred=val_outputs,
                 #    y=val_labels,
                 #    include_background=False,
                 #)
-                value = compute_meandice(
-                    y_pred=val_outputs,
-                    y=val_labels,
-                    include_background=False,
-                )
-                metric_count += len(value)
-                metric_sum += value.sum().item()
-            metric = metric_sum / metric_count
+                value = dice_metric(y_pred=val_outputs, y=val_labels)
+                metric_count += len(value[0])
+                metric_sum += value[0].sum().item()
+
+            # aggregate the final mean dice result
+            metric = dice_metric.aggregate().item()
+            # reset the status for next validation round
+            dice_metric.reset()
+            #metric = metric_sum / metric_count
             metric_values.append(metric)
             scheduler.step(metric)  ##
             writer.add_scalar("val_mean_dice", metric, epoch + 1)  ##
