@@ -278,7 +278,7 @@ val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
 test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=4, num_workers=0)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -441,7 +441,7 @@ with torch.no_grad():
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
 
-        #val_outputs = largest(val_outputs)
+        val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
