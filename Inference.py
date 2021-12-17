@@ -95,9 +95,9 @@ test_transforms = Compose(
     ]
 )
 
-test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=2)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=2)
 
 """## Create Model, Loss, Optimizer"""
 
