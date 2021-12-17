@@ -43,7 +43,7 @@ print("INFERENCE")
 
 md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
-root_dir = "//home//imoreira"
+root_dir = "//home//imoreira//Data"
 #root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Pancreas_Data")
 out_dir = os.path.join(data_dir, "Pancreas_Best_Model")
