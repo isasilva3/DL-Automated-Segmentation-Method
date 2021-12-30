@@ -21,6 +21,8 @@ Size: 10 3D volumes (8 Training + 2 Testing)
 Source: Catarina
 
 """
+from monai.handlers.tensorboard_handlers import SummaryWriter
+
 from MONAI.monai.transforms import RandAffined, Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, \
     RandGaussianSmoothd, RandAdjustContrastd, RandFlip, RandFlipd
 
@@ -38,13 +40,13 @@ import torch
 
 from monai.apps import download_and_extract
 from monai.config import print_config
-from monai.data import CacheDataset, DataLoader, Dataset
+from monai.data import CacheDataset, DataLoader, Dataset, decollate_batch
 from monai.utils import set_determinism, GridSampleMode, GridSamplePadMode
 from monai.networks.nets import SegResNet
 from monai.data.nifti_saver import NiftiSaver
 from monai.inferers import sliding_window_inference
-from monai.losses import DiceLoss
-from monai.metrics import compute_meandice
+from monai.losses import DiceLoss, DiceCELoss
+from monai.metrics import compute_meandice, DiceMetric
 from monai.networks.layers import Norm
 from monai.networks.nets import UNet
 from monai.transforms import (
@@ -87,6 +89,12 @@ root_dir = "//home//imoreira//Data"
 #root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Liver_Data")
 out_dir = os.path.join(root_dir, "Liver_Best_Model")
+
+tensorboard_dir = "//home//imoreira//Data//Tensorboard_Liver"
+
+
+writer = SummaryWriter(log_dir=tensorboard_dir)
+
 
 """## Set MSD Spleen dataset path"""
 
@@ -142,32 +150,32 @@ train_transforms = Compose(
             image_key="image",
             image_threshold=0,
         ),
-        # Rand3DElasticd(
-        #    keys=["image", "label"],
-        #    sigma_range=(0, 1),
-        #    magnitude_range=(0, 1),
-        #    spatial_size=None,
-        #    prob=0.1,
-        #    rotate_range=(-math.pi/36, math.pi/36),  # -15, 15 / -5, 5
-        #    shear_range=None,
-        #    translate_range=None,
-        #    scale_range=None,
-        #    mode=("bilinear", "nearest"),
-        #    padding_mode="zeros",
-        #    #as_tensor_output=False
-        # ),
-        # RandGaussianNoised(
-        #    keys=["image"],
-        #    prob=0.1,
-        #    mean=0.0,
-        #    std=0.1
-        #     #allow_missing_keys=False
-        # ),
-        #RandScaleIntensityd(
+        Rand3DElasticd(
+           keys=["image", "label"],
+           sigma_range=(0, 1),
+           magnitude_range=(0, 1),
+           spatial_size=None,
+           prob=0.5,
+           rotate_range=(-math.pi/36, math.pi/36),  # -15, 15 / -5, 5
+           shear_range=None,
+           translate_range=None,
+           scale_range=None,
+           mode=("bilinear", "nearest"),
+           padding_mode="zeros",
+           #as_tensor_output=False
+        ),
+        RandGaussianNoised(
+           keys=["image"],
+           prob=0.5,
+           mean=0.0,
+           std=0.1
+            #allow_missing_keys=False
+        ),
+        # RandScaleIntensityd(
         #    keys=["image"],
         #    factors=0.05,  # this is 10%, try 5%
         #    prob=0.5
-        #),
+        # ),
         #RandGaussianSmoothd(
         #    keys=["image"],
         #    sigma_x=(0.25, 1.5),
@@ -177,12 +185,12 @@ train_transforms = Compose(
         #    approx='erf'
             # allow_missing_keys=False
         #),
-        # RandAdjustContrastd(
-        #    keys=["image"],
-        #    prob=0.1,
-        #    gamma=(0.9, 1.1)
-        #     #allow_missing_keys=False
-        # ),
+        RandAdjustContrastd(
+           keys=["image"],
+           prob=0.5,
+           gamma=(0.9, 1.1)
+            #allow_missing_keys=False
+        ),
         # user can also add other random transforms
         # RandAffined(keys=['image', 'label'], mode=('bilinear', 'nearest'), prob=1.0, spatial_size=(96, 96, 96),
         #             rotate_range=(0, 0, np.pi/15), scale_range=(0.1, 0.1, 0.1)),
@@ -257,23 +265,23 @@ And set `num_workers` to enable multi-threads during caching.
 If want to to try the regular Dataset, just change to use the commented code below.
 """
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=2)
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=2)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
 
-train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
-train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
+# train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
+# train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
 
-val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=2)
+val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=1, num_workers=2)
+val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
-test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=2)
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=1, num_workers=2)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -290,12 +298,18 @@ model = UNet(
     num_res_units=2,
     norm=Norm.BATCH,
 ).to(device)
-loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-optimizer = torch.optim.Adam(model.parameters(), 1e-4)
+
+# loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+# optimizer = torch.optim.Adam(model.parameters(), 1e-4)
+
+loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+optimizer = torch.optim.Adam(model.parameters(), 1e-3)
+dice_metric = DiceMetric(include_background=False, reduction="mean")
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 200
+epoch_num = 300
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
@@ -323,6 +337,8 @@ for epoch in range(epoch_num):
         optimizer.step()
         epoch_loss += loss.item()
         print(f"{step}/{len(train_ds) // train_loader.batch_size}, train_loss: {loss.item():.4f}")
+        epoch_len = len(train_ds) // train_loader.batch_size  ##
+        writer.add_scalar("train_loss", loss.item(), epoch_len * epoch + step)  ##
     epoch_loss /= step
     epoch_loss_values.append(epoch_loss)
     print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")
@@ -337,21 +353,33 @@ for epoch in range(epoch_num):
                     val_data["image"].to(device),
                     val_data["label"].to(device),
                 )
-                roi_size = (160, 160, 160)
+                roi_size = (96, 96, 96)
                 sw_batch_size = 4
                 val_outputs = sliding_window_inference(val_inputs, roi_size, sw_batch_size, model)
-                val_outputs = post_pred(val_outputs)
-                val_labels = post_label(val_labels)
+                #val_outputs = post_pred(val_outputs)
+                #val_labels = post_label(val_labels)
+                val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
+                val_labels = [post_label(i) for i in decollate_batch(val_labels)]
                 largest = KeepLargestConnectedComponent(applied_labels=[1])
-                value = compute_meandice(
-                    y_pred=val_outputs,
-                    y=val_labels,
-                    include_background=False,
-                )
-                metric_count += len(value)
-                metric_sum += value.sum().item()
-            metric = metric_sum / metric_count
+                #value = compute_meandice(
+                #    y_pred=val_outputs,
+                #    y=val_labels,
+                #    include_background=False,
+                #)
+                value = dice_metric(y_pred=val_outputs, y=val_labels)
+                metric_count += len(value[0])
+                metric_sum += value[0].sum().item()
+
+            # aggregate the final mean dice result
+            metric = dice_metric.aggregate().item()
+            # reset the status for next validation round
+            dice_metric.reset()
+            #metric = metric_sum / metric_count
             metric_values.append(metric)
+            scheduler.step(metric)  ##
+            writer.add_scalar("val_mean_dice", metric, epoch + 1)  ##
+            writer.add_scalar("Learning rate", optimizer.param_groups[0]['lr'], epoch + 1)
+
             if metric > best_metric:
                 best_metric = metric
                 best_metric_epoch = epoch + 1
@@ -359,30 +387,32 @@ for epoch in range(epoch_num):
                 print("saved new best metric model")
             print(
                 f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
-                f"\nbest mean dice: {best_metric:.4f} at epoch: {best_metric_epoch}"
+                f"\nbest mean dice: {best_metric:.4f}"
+                f"at epoch: {best_metric_epoch}"
             )
 
-print(f"train completed, best_metric: {best_metric:.4f}  at epoch: {best_metric_epoch}")
-
+print(
+        f"train completed, best_metric: {best_metric:.4f}"
+        f"at epoch: {best_metric_epoch}")
 
 
 """## Plot the loss and metric"""
 
-fig2=plt.figure("train", (12, 6))
-plt.subplot(1, 2, 1)
-plt.title("Epoch Average Loss")
-x = [i + 1 for i in range(len(epoch_loss_values))]
-y = epoch_loss_values
-plt.xlabel("epoch")
-plt.plot(x, y)
-plt.subplot(1, 2, 2)
-plt.title("Val Mean Dice")
-x = [val_interval * (i + 1) for i in range(len(metric_values))]
-y = metric_values
-plt.xlabel("epoch")
-plt.plot(x, y)
-plt.show()
-fig2.savefig('Liver_Plot.png')
+# fig2=plt.figure("train", (12, 6))
+# plt.subplot(1, 2, 1)
+# plt.title("Epoch Average Loss")
+# x = [i + 1 for i in range(len(epoch_loss_values))]
+# y = epoch_loss_values
+# plt.xlabel("epoch")
+# plt.plot(x, y)
+# plt.subplot(1, 2, 2)
+# plt.title("Val Mean Dice")
+# x = [val_interval * (i + 1) for i in range(len(metric_values))]
+# y = metric_values
+# plt.xlabel("epoch")
+# plt.plot(x, y)
+# plt.show()
+# fig2.savefig('Liver_Plot.png')
 
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
@@ -399,21 +429,40 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, train_data in enumerate(train_inf_loader):
-        train_images = train_data["image"].to(device)
-        roi_size = (160, 160, 160)
+    # for i, train_data in enumerate(train_inf_loader):
+    #     train_images = train_data["image"].to(device)
+    #     roi_size = (160, 160, 160)
+    #     sw_batch_size = 4
+    #     val_outputs = sliding_window_inference(
+    #         train_images, roi_size, sw_batch_size, model
+    #     )
+    #     val_outputs = val_outputs.argmax(dim=1, keepdim=True)
+    #     val_outputs = largest(val_outputs)
+    #
+    #     val_outputs = val_outputs.cpu().clone().numpy()
+    #     val_outputs = val_outputs.astype(np.bool)
+    #
+    #     saver.save_batch(val_outputs, train_data["image_meta_dict"])
+
+    for test_data in test_loader:
+        test_images = test_data["image"].to(device)
+        roi_size = (96, 96, 96)
         sw_batch_size = 4
+
         val_outputs = sliding_window_inference(
-            train_images, roi_size, sw_batch_size, model
+            test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
+
+        # val_outputs = torch.squeeze(val_outputs, dim=1)
+
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
-        val_outputs = largest(val_outputs)
+
+        #val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
 
-        saver.save_batch(val_outputs, train_data["image_meta_dict"])
-
+        saver.save_batch(val_outputs, test_data["image_meta_dict"])
 
 
 
