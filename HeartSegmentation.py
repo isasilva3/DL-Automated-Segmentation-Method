@@ -23,7 +23,7 @@ Source: Catarina
 """
 from monai.handlers.tensorboard_handlers import SummaryWriter
 
-from MONAI.monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
+from monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
     RandAdjustContrastd, RandFlipd
 
 """## Setup imports"""

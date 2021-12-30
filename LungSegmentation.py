@@ -29,7 +29,7 @@ from monai.handlers.tensorboard_handlers import SummaryWriter
 from scipy import ndimage
 from skimage.viewer.plugins import measure
 
-from MONAI.monai.transforms import Rand3DElastic, RandGaussianNoise, RandScaleIntensity, RandGaussianSmooth, \
+from monai.transforms import Rand3DElastic, RandGaussianNoise, RandScaleIntensity, RandGaussianSmooth, \
     RandAdjustContrast, RandGaussianSmoothd, RandGaussianNoised, RandAdjustContrastd, RandScaleIntensityd, \
     Rand3DElasticd
 
