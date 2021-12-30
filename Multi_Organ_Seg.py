@@ -79,10 +79,12 @@ set_determinism(seed=0)
 
 '''
 Label 1: Bladder
-Label 2: Liver
-Label 3: Lungs
-Label 4: Heart
-Label 5: Pancreas
+Label 2: Brain
+Label 3: Liver
+Label 4: Lungs
+Label 5: Heart
+Label 6: Pancreas
+Label 7: Kidneys
 '''
 
 train_transforms = Compose(
@@ -239,7 +241,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = UNet(
     dimensions=3,
     in_channels=1,
-    out_channels=7, #6 channels, 1 for each organ more background
+    out_channels=8, #6 channels, 1 for each organ more background
     channels=(16, 32, 64, 128, 256),
     strides=(2, 2, 2, 2),
     num_res_units=2,
@@ -262,8 +264,8 @@ best_metric_epoch = -1
 epoch_loss_values = list()
 metric_values = list()
 #metric_values_class = list()
-post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=7)
-post_label = AsDiscrete(to_onehot=True, n_classes=7)
+post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=8)
+post_label = AsDiscrete(to_onehot=True, n_classes=8)
 
 classes_names = ['bladder', 'brain', 'liver', 'lungs', 'heart', 'pancreas']
 
@@ -296,7 +298,7 @@ for epoch in range(epoch_num):
 
     if (epoch + 1) % val_interval == 0:
         model.eval()
-        number_class = 6
+        number_class = 7
         with torch.no_grad():
             metric_sum = 0.0
             metric_count = 0
@@ -341,7 +343,7 @@ for epoch in range(epoch_num):
             writer.add_scalar("val_mean_dice", metric, epoch + 1) ##
             writer.add_scalar("Learning rate", optimizer.param_groups[0]['lr'], epoch + 1)
 
-            for number_of_class in range(6):
+            for number_of_class in range(7):
                 dice_name = 'Validate/Dice class: ' + classes_names[number_of_class]
                 writer.add_scalar(dice_name, (dice_metric_val[number_of_class] / len(val_loader)), epoch + 1)
 
