@@ -271,8 +271,8 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
 
 
-# train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
-# train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=0)
+train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
+train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=0)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
@@ -445,13 +445,13 @@ with torch.no_grad():
     #
     #     saver.save_batch(val_outputs, train_data["image_meta_dict"])
 
-    for test_data in test_loader:
-        test_images = test_data["image"].to(device)
+    for train_inf_data in train_inf_loader:
+        train_inf_images = train_inf_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 4
 
         val_outputs = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model, overlap=0.8
+            train_inf_images, roi_size, sw_batch_size, model, overlap=0.8
         )
 
         # val_outputs = torch.squeeze(val_outputs, dim=1)
@@ -463,4 +463,4 @@ with torch.no_grad():
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
 
-        saver.save_batch(val_outputs, test_data["image_meta_dict"])
+        saver.save_batch(val_outputs, train_inf_data["image_meta_dict"])

@@ -128,20 +128,20 @@ train_transforms = Compose(
            std=0.1
          #allow_missing_keys=False
         ),
-       RandScaleIntensityd(
-          keys=["image"],
-          factors=0.05,  # this is 10%, try 5%
-          prob=0.5
-       ),
-       RandGaussianSmoothd(
-          keys=["image"],
-          sigma_x=(0.25, 1.5),
-          sigma_y=(0.25, 1.5),
-          sigma_z=(0.25, 1.5),
-          prob=0.5,
-          approx='erf'
-        #allow_missing_keys=False
-       ),
+       # RandScaleIntensityd(
+       #    keys=["image"],
+       #    factors=0.05,  # this is 10%, try 5%
+       #    prob=0.5
+       # ),
+       # RandGaussianSmoothd(
+       #    keys=["image"],
+       #    sigma_x=(0.25, 1.5),
+       #    sigma_y=(0.25, 1.5),
+       #    sigma_z=(0.25, 1.5),
+       #    prob=0.5,
+       #    approx='erf'
+       #  #allow_missing_keys=False
+       # ),
        RandAdjustContrastd(
           keys=["image"],
           prob=0.5,
@@ -155,18 +155,18 @@ train_transforms = Compose(
        ToTensord(keys=["image", "label"]),
     ]
 )
-#train_inf_transforms = Compose(
-#    [
-#        LoadImaged(keys=["image", "label"]),
-#        AddChanneld(keys=["image", "label"]),
-#        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-#        Orientationd(keys=["image", "label"], axcodes="RAS"),
-#        ScaleIntensityRanged(
-#            keys=["image"], a_min=-350, a_max=50, b_min=0.0, b_max=1.0, clip=True,
-#        ),
-#        ToTensord(keys=["image", "label"]),
-#    ]
-#)
+train_inf_transforms = Compose(
+   [
+       LoadImaged(keys=["image", "label"]),
+       AddChanneld(keys=["image", "label"]),
+       Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+       Orientationd(keys=["image", "label"], axcodes="RAS"),
+       ScaleIntensityRanged(
+           keys=["image"], a_min=-1000, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+       ),
+       ToTensord(keys=["image", "label"]),
+   ]
+)
 val_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
@@ -221,8 +221,8 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=0)
 
 
-#train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
-#train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
+train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
+train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=0)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
@@ -413,13 +413,13 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, test_data in enumerate(test_loader):
-        test_images = test_data["image"].to(device)
+    for i, train_inf_data in enumerate(train_inf_loader):
+        train_inf_images = train_inf_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 4
 
         val_outputs = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model, overlap=0.8
+            train_inf_images, roi_size, sw_batch_size, model, overlap=0.8
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         #val_outputs = val_outputs.squeeze(dim=0).cpu().clone().numpy()
@@ -431,4 +431,4 @@ with torch.no_grad():
         #val_outputs = torch.argmax(val_outputs, dim=1)
         #val_outputs = val_outputs.squeeze(dim=0).cpu().data.numpy()
 
-        saver.save_batch(val_outputs, test_data["image_meta_dict"])
+        saver.save_batch(val_outputs, train_inf_data["image_meta_dict"])
