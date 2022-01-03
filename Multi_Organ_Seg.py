@@ -413,13 +413,13 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, val_data in enumerate(val_loader):
-        val_images = val_data["image"].to(device)
+    for i, test_data in enumerate(test_loader):
+        test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 4
 
         val_outputs = sliding_window_inference(
-            val_images, roi_size, sw_batch_size, model, overlap=0.8
+            test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
         #val_outputs = val_outputs.squeeze(dim=0).cpu().clone().numpy()
@@ -431,4 +431,4 @@ with torch.no_grad():
         #val_outputs = torch.argmax(val_outputs, dim=1)
         #val_outputs = val_outputs.squeeze(dim=0).cpu().data.numpy()
 
-        saver.save_batch(val_outputs, val_data["image_meta_dict"])
+        saver.save_batch(val_outputs, test_data["image_meta_dict"])
