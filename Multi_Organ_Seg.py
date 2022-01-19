@@ -213,7 +213,7 @@ print(f"image shape: {image.shape}, label shape: {label.shape}")
 # #fig.savefig('my_figure.png')
 
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=2)
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
@@ -257,7 +257,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 600
+epoch_num = 800
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
