@@ -257,7 +257,7 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=
 
 """## Execute a typical PyTorch training process"""
 
-epoch_num = 800
+epoch_num = 600
 val_interval = 2
 best_metric = -1
 best_metric_epoch = -1
