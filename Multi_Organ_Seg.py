@@ -218,7 +218,7 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=0)
 
 
 train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
@@ -264,8 +264,8 @@ best_metric_epoch = -1
 epoch_loss_values = list()
 metric_values = list()
 #metric_values_class = list()
-post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=8)
-post_label = AsDiscrete(to_onehot=True, n_classes=8)
+post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=7)
+post_label = AsDiscrete(to_onehot=True, n_classes=7)
 
 classes_names = ['bladder', 'brain', 'liver', 'lungs', 'heart', 'pancreas', 'kidneys']
 
