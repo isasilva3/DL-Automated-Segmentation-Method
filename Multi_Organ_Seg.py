@@ -119,7 +119,7 @@ train_transforms = Compose(
            scale_range=None,
            mode=("bilinear", "nearest"),
            padding_mode="zeros",
-          #as_tensor_output=False
+           #as_tensor_output=False
         ),
         RandGaussianNoised(
            keys=["image"],
@@ -213,7 +213,7 @@ print(f"image shape: {image.shape}, label shape: {label.shape}")
 # #fig.savefig('my_figure.png')
 
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=2)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
@@ -221,8 +221,8 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=0)
 
 
-train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
-train_inf_loader = DataLoader(train_inf_ds, batch_size=4, num_workers=0)
+#train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
+#train_inf_loader = DataLoader(train_inf_ds, batch_size=4, num_workers=0)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
@@ -264,8 +264,8 @@ best_metric_epoch = -1
 epoch_loss_values = list()
 metric_values = list()
 #metric_values_class = list()
-post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=7)
-post_label = AsDiscrete(to_onehot=True, n_classes=7)
+post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=8)
+post_label = AsDiscrete(to_onehot=True, n_classes=8)
 
 classes_names = ['bladder', 'brain', 'liver', 'lungs', 'heart', 'pancreas', 'kidneys']
 
@@ -413,8 +413,8 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    #for i, test_data in enumerate(test_loader):
-    for test_data in test_loader:
+    for i, test_data in enumerate(test_loader):
+    #for test_data in test_loader:
         test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 4
