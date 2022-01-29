@@ -46,7 +46,7 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 root_dir = "/home/imoreira"
 #root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Data")
-out_dir = os.path.join(data_dir, "Pancreas_Best_Model")
+out_dir = os.path.join(data_dir, "Kidneys_Best_Model")
 
 """## Set dataset path"""
 
@@ -88,16 +88,33 @@ test_transforms = Compose(
         Spacingd(keys="image", pixdim=(1.5, 1.5, 2.0), mode="bilinear"),
         Orientationd(keys="image", axcodes="RAS"),
         ScaleIntensityRanged(
-            keys="image", a_min=-151, a_max=67, b_min=0.0, b_max=1.0, clip=True,
+            keys="image", a_min=-300, a_max=300, b_min=0.0, b_max=1.0, clip=True,
         ),
         #CropForegroundd(keys=["image", "label"], source_key="image"),
         ToTensord(keys="image"),
+    ]
+)
+val_transforms = Compose(
+    [
+        LoadImaged(keys=["image", "label"]),
+        AddChanneld(keys=["image", "label"]),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-300, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+        ),
+        #CropForegroundd(keys=["image", "label"], source_key="image"),
+        ToTensord(keys=["image", "label"]),
     ]
 )
 
 test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
 #test_ds = Dataset(data=test_files)
 test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
+
+val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
+# val_ds = Dataset(data=val_files, transform=val_transforms)
+val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
 
 """## Create Model, Loss, Optimizer"""
 
@@ -116,12 +133,12 @@ model = UNet(
 # loss_function = DiceLoss(to_onehot_y=True, softmax=False, sigmoid=True)
 # optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
-loss_function = DiceCELoss(to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+loss_function = DiceCELoss(include_background=True, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
 
-largest = KeepLargestConnectedComponent(applied_labels=[1])
+#largest = KeepLargestConnectedComponent(applied_labels=[0])
 
 """## Makes the Inferences """
 
@@ -129,29 +146,29 @@ model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth"))
 model.eval()
 with torch.no_grad():
     #saver = NiftiSaver(output_dir='C:\\Users\\isasi\\Downloads\\Bladder_Segs_Out')
-    saver = NiftiSaver(output_dir='//home//imoreira//Pancreas_Segs_Out',
-                       output_postfix="seg_pancreas",
+    saver = NiftiSaver(output_dir='//home//imoreira//Kidneys_Segs_Out',
+                       output_postfix="seg_kidneys",
                        output_ext=".nii.gz",
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for test_data in test_loader:
-        test_images = test_data["image"].to(device)
+    for val_data in val_loader:
+        val_images = val_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 4
 
         val_outputs = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model, overlap=0.8
+            val_images, roi_size, sw_batch_size, model, overlap=0.8
         )
 
         # val_outputs = torch.squeeze(val_outputs, dim=1)
 
         val_outputs = val_outputs.argmax(dim=1, keepdim=True)
 
-        val_outputs = largest(val_outputs)
+        #val_outputs = largest(val_outputs)
 
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
 
-        saver.save_batch(val_outputs, test_data["image_meta_dict"])
+        saver.save_batch(val_outputs, val_data["image_meta_dict"])
 
