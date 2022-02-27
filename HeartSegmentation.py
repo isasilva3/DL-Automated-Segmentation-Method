@@ -446,7 +446,7 @@ with torch.no_grad():
     #     saver.save_batch(val_outputs, train_data["image_meta_dict"])
 
     for test_data in test_loader:
-        test_images = val_data["image"].to(device)
+        test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 4
 
