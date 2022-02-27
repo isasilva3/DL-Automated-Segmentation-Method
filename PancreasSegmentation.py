@@ -298,7 +298,7 @@ model = UNet(
 #loss_function = DiceLoss(to_onehot_y=True, softmax=True)
 #optimizer = torch.optim.Adam(model.parameters(), 1e-4)
 
-loss_function = DiceCELoss(to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
+loss_function = DiceCELoss(include_background=False, to_onehot_y=True, softmax=True, lambda_dice=0.5, lambda_ce=0.5)
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 dice_metric = DiceMetric(include_background=False, reduction="mean")
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', factor=0.5) ##
