@@ -53,7 +53,7 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 root_dir = "//home//imoreira"
 #root_dir = "C:\\Users\\isasi\\Downloads"
 data_dir = os.path.join(root_dir, "Data")
-out_dir = os.path.join(data_dir, "Best_Model")
+out_dir = os.path.join(data_dir, "MO_Best_Model")
 tensorboard_dir = "//home//imoreira//Data//Tensorboard"
 
 writer = SummaryWriter(log_dir=tensorboard_dir) ##
