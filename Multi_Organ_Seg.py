@@ -400,7 +400,7 @@ print(
 """## Check best model output with the input image and label"""
 """## Makes the Inferences """
 ###
-out_dir = "//home//imoreira//Data//Best_Model"
+out_dir = "//home//imoreira//Data//MO_Best_Model"
 #out_dir = "C:\\Users\\isasi\\Downloads\\Bladder_Best_Model"
 model.load_state_dict(torch.load(os.path.join(out_dir, "best_metric_model.pth")))
 model.eval()
