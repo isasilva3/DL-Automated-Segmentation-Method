@@ -61,16 +61,16 @@ writer = SummaryWriter(log_dir=tensorboard_dir)
 """## Set dataset path"""
 
 train_images = sorted(glob.glob(os.path.join(data_dir, "Images", "*.nii.gz")))
-train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
-data_dicts = [
-    {"image": image_name, "label": label_name}
-    for image_name, label_name in zip(train_images, train_labels)
-]
-
-#data_dicts = [
-#     {"image": image_name}
-#     for image_name in train_images
+# train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
+# data_dicts = [
+#     {"image": image_name, "label": label_name}
+#     for image_name, label_name in zip(train_images, train_labels)
 # ]
+
+data_dicts = [
+    {"image": image_name}
+    for image_name in train_images
+]
 
 #n = len(data_dicts)
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
