@@ -51,7 +51,7 @@ md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
 
 root_dir = "//home//imoreira"
 #root_dir = "C:\\Users\\isasi\\Downloads"
-data_dir = os.path.join(root_dir, "Data")
+data_dir = os.path.join(root_dir, "Kidneys_Data")
 out_dir = os.path.join(data_dir, "Kidneys_Best_Model")
 tensorboard_dir= "//home//imoreira//Data//Tensorboard_Kidneys"
 
@@ -60,17 +60,17 @@ writer = SummaryWriter(log_dir=tensorboard_dir)
 
 """## Set dataset path"""
 
-train_images = sorted(glob.glob(os.path.join(data_dir, "Images", "*.nii.gz")))
-# train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
-# data_dicts = [
-#     {"image": image_name, "label": label_name}
-#     for image_name, label_name in zip(train_images, train_labels)
-# ]
-
+train_images = sorted(glob.glob(os.path.join(data_dir, "imagesTr", "*.nii.gz")))
+train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
 data_dicts = [
-    {"image": image_name}
-    for image_name in train_images
+    {"image": image_name, "label": label_name}
+    for image_name, label_name in zip(train_images, train_labels)
 ]
+#
+# data_dicts = [
+#     {"image": image_name}
+#     for image_name in train_images
+# ]
 
 #n = len(data_dicts)
 #train_files, val_files = data_dicts[:-3], data_dicts[-3:]
@@ -90,7 +90,18 @@ Label 3: Lungs
 Label 4: Heart
 Label 5: Pancreas
 '''
-
+train_inf_transforms = Compose(
+    [
+        LoadImaged(keys=["image", "label"]),
+        AddChanneld(keys=["image", "label"]),
+        Spacingd(keys=["image", "label"], pixdim=(1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+        Orientationd(keys=["image", "label"], axcodes="RAS"),
+        ScaleIntensityRanged(
+            keys=["image"], a_min=-300, a_max=300, b_min=0.0, b_max=1.0, clip=True,
+        ),
+        ToTensord(keys=["image", "label"]),
+    ]
+)
 val_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"]),
@@ -154,8 +165,8 @@ If want to to try the regular Dataset, just change to use the commented code bel
 #train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
 
 
-#train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
-#train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=0)
+train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
+train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=0)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
