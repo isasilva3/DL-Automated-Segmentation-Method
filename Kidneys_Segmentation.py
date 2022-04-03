@@ -1,42 +1,16 @@
 # -*- coding: utf-8 -*-
-"""
-# Pancreas 3D segmentation with MONAI
-
-This tutorial shows how to integrate MONAI into an existing PyTorch medical DL program.
-
-And easily use below features:
-1. Transforms for dictionary format data.
-1. Load Nifti image with metadata.
-1. Add channel dim to the data if no channel dimension.
-1. Scale medical image intensity with expected range.
-1. Crop out a batch of balanced images based on positive / negative label ratio.
-1. Cache IO and transforms to accelerate training and validation.
-1. 3D UNet model, Dice loss function, Mean Dice metric for 3D segmentation task.
-1. Sliding window inference method.
-1. Deterministic training for reproducibility.
-
-Target: Pancreas
-Modality: CT
-Size: 10 3D volumes (8 Training + 2 Testing)
-Source: Catarina
-
-"""
-from monai.handlers.tensorboard_handlers import SummaryWriter
-from monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
-    RandAdjustContrastd, RandFlipd
-
-"""## Setup imports"""
-
 import glob
 import os
 import shutil
 import tempfile
 import nibabel as nib
 import numpy as np
-
 import matplotlib.pyplot as plt
 import torch
 
+from monai.handlers.tensorboard_handlers import SummaryWriter
+from monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
+    RandAdjustContrastd, RandFlipd
 from monai.apps import download_and_extract
 from monai.config import print_config
 from monai.data import CacheDataset, DataLoader, Dataset, decollate_batch
@@ -148,8 +122,8 @@ train_transforms = Compose(
         ),
         Rand3DElasticd(
             keys=["image", "label"],
-            sigma_range=(5, 30),
-            magnitude_range=(70, 90),
+            sigma_range=(0, 1),
+            magnitude_range=(0, 1),
             spatial_size=None,
             prob=0.5,
             rotate_range=(0, -math.pi / 36, math.pi / 36, 0),  # -15, 15 / -5, 5
@@ -164,7 +138,7 @@ train_transforms = Compose(
             keys=["image"],
             prob=0.5,
             mean=0.0,
-            std=0.03
+            std=0.1
             # allow_missing_keys=False
         ),
        #RandScaleIntensityd(
@@ -261,24 +235,24 @@ And set `num_workers` to enable multi-threads during caching.
 If want to to try the regular Dataset, just change to use the commented code below.
 """
 
-train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=0)
+train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=2)
 # train_ds = monai.data.Dataset(data=train_files, transform=train_transforms)
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=2)
 
 
-train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=0)
-train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=0)
+train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
+train_inf_loader = DataLoader(train_inf_ds, batch_size=4, num_workers=2)
 
-val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=0)
+val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=2)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=1, num_workers=0)
+val_loader = DataLoader(val_ds, batch_size=4, num_workers=2)
 
-test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=0)
+test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=2)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=1, num_workers=0)
+test_loader = DataLoader(test_ds, batch_size=4, num_workers=2)
 
 
 """## Create Model, Loss, Optimizer"""
@@ -334,7 +308,8 @@ for epoch in range(epoch_num):
         epoch_loss += loss.item()
         print(f"{step}/{len(train_ds) // train_loader.batch_size}, train_loss: {loss.item():.4f}")
         epoch_len = len(train_ds) // train_loader.batch_size  ##
-        writer.add_scalar("train_loss", loss.item(), epoch_len * epoch + step)  ##
+        # writer.add_scalar("train_loss", loss.item(), epoch_len * epoch + step)  ##
+        writer.add_scalar("train_loss", epoch_loss, epoch + 1)
     epoch_loss /= step
     epoch_loss_values.append(epoch_loss)
     print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")
@@ -427,14 +402,14 @@ with torch.no_grad():
                        mode="nearest",
                        padding_mode="zeros"
                        )
-    for i, val_data in enumerate(val_loader):
+    for i, test_data in enumerate(test_loader):
     #for test_data in test_loader:
-        val_images = val_data["image"].to(device)
+        test_images = test_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 4
 
         val_outputs = sliding_window_inference(
-            val_images, roi_size, sw_batch_size, model, overlap=0.8
+            test_images, roi_size, sw_batch_size, model, overlap=0.8
         )
 
         # val_outputs = torch.squeeze(val_outputs, dim=1)
@@ -446,4 +421,4 @@ with torch.no_grad():
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
 
-        saver.save_batch(val_outputs, val_data["image_meta_dict"])
+        saver.save_batch(val_outputs, test_data["image_meta_dict"])
