@@ -235,7 +235,7 @@ test_transforms = Compose(
 """## Check transforms in DataLoader"""
 
 check_ds = Dataset(data=val_files, transform=val_transforms)
-check_loader = DataLoader(check_ds, batch_size=4)
+check_loader = DataLoader(check_ds, batch_size=1)
 check_data = first(check_loader)
 image, label = (check_data["image"][0][0], check_data["label"][0][0])
 print(f"image shape: {image.shape}, label shape: {label.shape}")
@@ -273,11 +273,11 @@ train_inf_loader = DataLoader(train_inf_ds, batch_size=4, num_workers=2)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=2)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=4, num_workers=2)
+val_loader = DataLoader(val_ds, batch_size=1, num_workers=2)
 
 test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=2)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=4, num_workers=2)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=2)
 
 """## Create Model, Loss, Optimizer"""
 

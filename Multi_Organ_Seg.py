@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
-
-from monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
-    RandAdjustContrastd, RandFlipd
-
-"""## Setup imports"""
-
 import glob
 import os
 import shutil
 import tempfile
 import nibabel as nib
 import numpy as np
-
 import matplotlib.pyplot as plt
 import torch
 
+from monai.transforms import Rand3DElasticd, RandGaussianNoised, RandScaleIntensityd, RandGaussianSmoothd, \
+    RandAdjustContrastd, RandFlipd
 from monai.apps import download_and_extract
 from monai.config import print_config
 from monai.data import CacheDataset, DataLoader, Dataset, decollate_batch
@@ -116,7 +111,7 @@ train_transforms = Compose(
             rotate_range=(0, -math.pi / 36, math.pi / 36, 0),  # -15, 15 / -5, 5
             shear_range=None,
             translate_range=None,
-            scale_range=(0.15, 0.15, 0.15),
+            scale_range=None,
             mode=("bilinear", "nearest"),
             padding_mode="zeros",
             # as_tensor_output=False
@@ -197,7 +192,7 @@ test_transforms = Compose(
 """## Check transforms in DataLoader"""
 
 check_ds = Dataset(data=val_files, transform=val_transforms)
-check_loader = DataLoader(check_ds, batch_size=4)
+check_loader = DataLoader(check_ds, batch_size=1)
 check_data = first(check_loader)
 image, label = (check_data["image"][0][0], check_data["label"][0][0])
 print(f"image shape: {image.shape}, label shape: {label.shape}")
@@ -226,11 +221,11 @@ train_inf_loader = DataLoader(train_inf_ds, batch_size=4, num_workers=2)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=2)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
-val_loader = DataLoader(val_ds, batch_size=4, num_workers=2)
+val_loader = DataLoader(val_ds, batch_size=1, num_workers=2)
 
 test_ds = CacheDataset(data=test_files, transform=test_transforms, cache_rate=1.0, num_workers=2)
 #test_ds = Dataset(data=test_files)
-test_loader = DataLoader(test_ds, batch_size=4, num_workers=2)
+test_loader = DataLoader(test_ds, batch_size=1, num_workers=2)
 
 
 """## Create Model, Loss, Optimizer"""
