@@ -240,11 +240,11 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=2)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=2)
 
 
 train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
-train_inf_loader = DataLoader(train_inf_ds, batch_size=4, num_workers=2)
+train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=2)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
