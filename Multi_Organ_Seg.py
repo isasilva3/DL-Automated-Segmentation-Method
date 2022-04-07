@@ -104,14 +104,14 @@ train_transforms = Compose(
         ),
         Rand3DElasticd(
             keys=["image", "label"],
-            sigma_range=(5, 30),
-            magnitude_range=(70, 90),
+            sigma_range=(0, 1),
+            magnitude_range=(0, 1),
             spatial_size=None,
             prob=0.5,
             rotate_range=(0, -math.pi / 36, math.pi / 36, 0),  # -15, 15 / -5, 5
             shear_range=None,
             translate_range=None,
-            scale_range=(0.15, 0.15, 0.15),
+            scale_range=None,
             mode=("bilinear", "nearest"),
             padding_mode="zeros",
             # as_tensor_output=False
@@ -120,7 +120,7 @@ train_transforms = Compose(
             keys=["image"],
             prob=0.5,
             mean=0.0,
-            std=0.03
+            std=0.1
             # allow_missing_keys=False
         ),
        # RandScaleIntensityd(
@@ -213,11 +213,11 @@ train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate
 
 # use batch_size=2 to load images and use RandCropByPosNegLabeld
 # to generate 2 x 4 images for network training
-train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=2)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=2)
 
 
 train_inf_ds = CacheDataset(data=train_files, transform=train_inf_transforms, cache_rate=1.0, num_workers=2)
-train_inf_loader = DataLoader(train_inf_ds, batch_size=4, num_workers=2)
+train_inf_loader = DataLoader(train_inf_ds, batch_size=1, num_workers=2)
 
 val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=2)
 # val_ds = Dataset(data=val_files, transform=val_transforms)
