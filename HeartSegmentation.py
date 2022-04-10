@@ -124,14 +124,14 @@ train_transforms = Compose(
         ),
         Rand3DElasticd(
             keys=["image", "label"],
-            sigma_range=(5, 30),
-            magnitude_range=(70, 90),
+            sigma_range=(0, 1),
+            magnitude_range=(0, 1),
             spatial_size=None,
             prob=0.5,
             rotate_range=(0, -math.pi / 36, math.pi / 36, 0),  # -15, 15 / -5, 5
             shear_range=None,
             translate_range=None,
-            scale_range=(0.15, 0.15, 0.15),
+            scale_range=None,
             mode=("bilinear", "nearest"),
             padding_mode="zeros",
             # as_tensor_output=False
@@ -140,7 +140,7 @@ train_transforms = Compose(
             keys=["image"],
             prob=0.5,
             mean=0.0,
-            std=0.03
+            std=0.1
             # allow_missing_keys=False
         ),
        #RandScaleIntensityd(
@@ -420,13 +420,13 @@ with torch.no_grad():
     #
     #     saver.save_batch(val_outputs, train_data["image_meta_dict"])
 
-    for i, test_data in enumerate(test_loader):
-        test_images = test_data["image"].to(device)
+    for i, train_data in enumerate(train_loader):
+        train_images = train_data["image"].to(device)
         roi_size = (96, 96, 96)
         sw_batch_size = 4
 
         val_outputs = sliding_window_inference(
-            test_images, roi_size, sw_batch_size, model, overlap=0.8
+            train_images, roi_size, sw_batch_size, model, overlap=0.8
         )
 
         # val_outputs = torch.squeeze(val_outputs, dim=1)
@@ -438,4 +438,4 @@ with torch.no_grad():
         val_outputs = val_outputs.cpu().clone().numpy()
         val_outputs = val_outputs.astype(np.bool)
 
-        saver.save_batch(val_outputs, test_data["image_meta_dict"])
+        saver.save_batch(val_outputs, train_data["image_meta_dict"])
